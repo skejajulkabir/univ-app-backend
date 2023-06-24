@@ -28,6 +28,7 @@ const reviewsSchema = new mongoose.Schema({
 
 const productSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  author: { type: String, required: true },
   brand: { type: String, default: "No Brand" },
   slug: { type: String, required: true},
   description: { type: String, required: true },
