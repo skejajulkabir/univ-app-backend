@@ -11,36 +11,69 @@ const addproductsController = async (req, res) => {
       const products = req.body;
   
       for (let i = 0; i < products.length; i++) {
+        // const {
+        //   title,
+        //   author,
+        //   brand,
+        //   slug,
+        //   description,
+        //   img,
+        //   category,
+        //   variants,
+        //   size,
+        //   color,
+        //   price,
+        //   availableQty,
+        //   reviews,
+        // } = products[i];
+
+
+
+
+
         const {
-          title,
+          title ,
           author,
-          brand,
-          slug,
-          description,
-          img,
-          category,
-          variants,
-          size,
-          color,
-          price,
-          availableQty,
-          reviews,
+          brand ,
+          slug ,
+          description ,
+          img ,
+          category ,
+          price ,
+          done ,
+          reviews ,
+          variants ,
         } = products[i];
   
+        // const product = new Product({
+        //   title,
+        //   author,
+        //   brand,
+        //   slug,
+        //   description,
+        //   img,
+        //   category,
+        //   variants,
+        //   size,
+        //   color,
+        //   price,
+        //   availableQty,
+        //   reviews,
+        // });
+
+
         const product = new Product({
-          title,
+          title ,
           author,
-          brand,
-          slug,
-          description,
-          img,
-          category,
-          variants,
-          size,
-          color,
-          price,
-          availableQty,
+          brand ,
+          slug ,
+          description ,
+          img ,
+          category ,
+          price ,
+          done ,
           reviews,
+          variants ,
         });
   
         await product.save();
