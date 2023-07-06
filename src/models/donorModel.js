@@ -12,6 +12,7 @@ const donorSchema = new mongoose.Schema({
             name: { type: String, required:true},
             userName: { type: String, required:true},
             amount: { type: Number, required:true},
+            isAmountPublic: { type: Boolean, required:true},
             desc: { type: String , required:true},
             info: {type: String, required:true},
         }

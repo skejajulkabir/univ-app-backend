@@ -38,5 +38,8 @@ const productSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+
+productSchema.index({ slug: 1, 'author.userName': 1 }, { unique: true }); // Apply compound unique index
+
 mongoose.models = {};
 module.exports = mongoose.model("Product", productSchema);
