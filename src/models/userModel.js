@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
     avatar: { type: String , default: "none" },
     regularEmail: { type: String, required: true , unique: true },
     password: { type: String, required: true },
-    role: {type: String , default:'STUDENT'},
+    role: {type: Array , default:['STUDENT']},
     awards: [{
         name:{type: String},
         givenBy:{type: String},

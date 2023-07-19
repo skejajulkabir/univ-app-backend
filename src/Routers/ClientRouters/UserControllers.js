@@ -1,5 +1,6 @@
 //importing loibraries
 const CryptoJS = require("crypto-js");
+const jwt = require('jsonwebtoken');
 
 
 // Importing mongoose models
@@ -105,12 +106,24 @@ const loginUserCpntroller = async (req , res)=>{
       const dbPass = bytes.toString(CryptoJS.enc.Utf8);
       // console.log(dbPass);
       // CryptoJS.AES.decrypt(user.password, 'secret key 123').toString(CryptoJS.enc.Utf8);
-      if (req.body.regularEmail == user.regularEmail && req.body.password == dbPass) {
-        res.status(200).send({"success": true , "message":"Login operation successful!"})
+      if (req.body.regularEmail === user.regularEmail && req.body.password === dbPass) {
+        //success
+        const token = jwt.sign({
+          name : user.name ,
+          username : user.userName,
+          uid : user._id
+        } ,
+          "openSecretKey" , 
+          { expiresIn: '30m' });
+
+
+        res.status(200).send({"success": true , "message":"Login operation successful!" , token : token});
       } else {
-        res.status(200).send({"success": false , "message": "Invalid credentials..."})
+        //user find failed
+        res.status(400).send({"success": false , "message": "Invalid credentials..."})
       }
     }else{
+      //server error
       res.status(400).json({message: "user not found."})
     }
   } catch (error) {
@@ -136,6 +149,16 @@ const getUserController = async (req,res)=>{
 };
 
 
+const getUserByIdController = async (req,res)=>{
+  const uid = req.params.id;
+    // console.log(pid)
+  try {
+      let user = await User.findOne({ _id : uid}).select('-password');
+      res.status(200).json({user})
+  } catch (error) {
+      res.status(400).json({'message' : "could not find" , error})
+  }
+};
 
 
 
@@ -145,226 +168,9 @@ const getUserController = async (req,res)=>{
 
 
 
-module.exports = { addUserController , getUserController ,loginUserCpntroller };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // Importing mongoose models
-// const User = require("../../models/userModel");
-
-// const addUserController = async (req, res) => {
-//   try {
-//     const newUser = req.body;
-
-//     const {
-//       name,
-//       userName,
-//       avatar,
-//       regularEmail,
-//       password,
-//       role,
-//       awards,
-//       userType,
-//       info,
-//       contact,
-//     } = newUser;
-
-//     const {
-//       department,
-//       roll,
-//       admissionSession,
-//       currentLocation,
-//       Gender,
-//       from,
-//     } = info;
-
-//     const { phoneNumber, univEmail, Facebook, LinkedIn, insta, YouTube, Discord } =
-//       contact;
-
-//     const u = new User({
-//       name,
-//       userName,
-//       avatar,
-//       regularEmail,
-//       password,
-//       role,
-//       awards,
-//       userType,
-//       info: {
-//         department,
-//         roll,
-//         admissionSession,
-//         currentLocation,
-//         Gender,
-//         from,
-//       },
-//       contact: {
-//         phoneNumber: {
-//           Number: phoneNumber.Number,
-//           isPublic: phoneNumber.isPublic,
-//         },
-//         univEmail,
-//         Facebook,
-//         LinkedIn,
-//         insta,
-//         YouTube,
-//         Discord,
-//       },
-//     });
-
-//     await u.save();
-
-//     res
-//       .status(200)
-//       .json({ message: "The user has been added successfully to the DB." });
-//   } catch (error) {
-//     console.error("Error saving user:", error);
-//     res.status(500).json({ message: "Could not add user to the DB.", error });
-//   }
-// };
-
-// module.exports = { addUserController };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Importing mongoose models
-// const User = require("../../models/userModel");
-
-
-
-// const updateproductController = async (req,res)=>{};
-
-
-// const addUserController = async (req, res) => {
-//     try {
-//       const newUser = req.body;
-  
-//         const { 
-//               name,
-//               userName ,
-//               email ,
-//               password ,
-//               userType , 
-//               department ,
-//               roll ,
-//               admissionSession ,
-//               currentLocation ,
-//               Gender ,
-//               from ,
-//               phoneNumber ,
-//               isPublic ,
-//               Facebook ,
-//               LinkedIn ,
-//               insta ,
-//               YouTube ,
-//               Discord 
-//          } = newUser;
-
-        // const product = new Product({ title , author, brand , slug , description , img , category , price , done , reviews, variants });
-//         const u = new User(
-//             {
-//               name,
-//               userName ,
-//               email ,
-//               password ,
-//               userType , 
-//               department ,
-//               roll ,
-//               admissionSession ,
-//               currentLocation ,
-//               Gender ,
-//               from ,
-//               phoneNumber ,
-//               isPublic ,
-//               Facebook ,
-//               LinkedIn ,
-//               insta ,
-//               YouTube ,
-//               Discord ,
-//             }
-//         );
-  
-//         await u.save();
-  
-//       res.status(200).json({ message: "the user has been added successfully to the DB." });
-//     } catch (error) {
-//       console.error("Error saving user:", error);
-//       res.status(500).json({ message: "Could not add user to the DB.", error });
-//     }
-// }
-
-
-// so this is the CRUD operation... the read functionality is at client1 segment...
-// module.exports = {addUserController};
-
-
-
-
-
-
-
-
-
+module.exports = { addUserController , getUserController ,loginUserCpntroller , getUserByIdController };
 
 
 
