@@ -2,18 +2,15 @@ const mongoose = require("mongoose");
 
 
 
-
-
-
-
 const availableTshirtSizeSchema = new mongoose.Schema({
-    availableSizes:[
+    name : {type: String, required: true},
+    data : [
         {
-            size: {type: String, required: true},
-            Quantity: {type: Number, required: true},
+            size : {type : String , required: true},
+            quantity : {type : String , required: true}
         }
     ]
-}, { timestamps: true });
+});
 
 mongoose.models = {};
-module.exports = mongoose.model("availableTshirtSize", availableTshirtSizeSchema);
+module.exports = mongoose.model("AvailableTshirtSize", availableTshirtSizeSchema);

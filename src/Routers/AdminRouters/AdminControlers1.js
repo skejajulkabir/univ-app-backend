@@ -1,5 +1,6 @@
 // Importing mongoose models
 const Product = require("../../models/product");
+const AvailableTshirtSize = require('../../models/availableTshirtSize')
 
 
 
@@ -65,5 +66,26 @@ const deleteProductController = async (req,res)=>{
 
 
 
+
+const addSizesController = async (req, res) => {
+  try {
+    const s = req.body;
+
+      const { name , data } = s;
+
+      const pst = new AvailableTshirtSize({ name , data });
+
+      await pst.save();
+
+    res.status(200).json({ message: "post have been added successfully to the DB." });
+  } catch (error) {
+    console.error("Error saving data:", error);
+    res.status(500).json({ message: "Could not add size to the DB.", error });
+  }
+}
+
+
+
+
 // so this is the CRUD operation... the read functionality is at client1 segment...
-module.exports = {addproductsController , updateproductController , deleteProductController};
+module.exports = {addproductsController , updateproductController , deleteProductController , addSizesController};

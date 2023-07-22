@@ -1,7 +1,7 @@
 const express = require('express');
 
 // importing controllers
-const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController} = require('./ClientControlers1')
+const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController} = require('./ClientControlers1')
 const {addUserController , getUserController , loginUserCpntroller , getUserByIdController} = require('./UserControllers')
 
 // Importing mongoose models
@@ -12,6 +12,7 @@ const ClientRouter1 = express.Router();
 
 
 ClientRouter1.get('/getproducts', getProductController);
+ClientRouter1.get('/getavailablesizes', getAvailableTshirtSizeController);
 ClientRouter1.get('/product/:id', findproductbyidController);
 
 

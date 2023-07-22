@@ -1,7 +1,7 @@
 const express = require('express');
 
 // requiring controllers
-const { addproductsController , updateproductController , deleteProductController } = require('./AdminControlers1');
+const { addproductsController , updateproductController , deleteProductController , addSizesController } = require('./AdminControlers1');
 
 
 
@@ -13,5 +13,10 @@ AdminRouter1.post('/addproducts', addproductsController );
 AdminRouter1.put('/updateproducts', updateproductController );
 AdminRouter1.delete('/deleteproduct/:id', deleteProductController );
 
+
+
+
+
+AdminRouter1.post('/addsizes', addSizesController );
 
 module.exports = AdminRouter1;
