@@ -11,14 +11,14 @@ const postSchema = new mongoose.Schema({
   typeOfThePost: { type: String, required: true },
   imgURL: { type: String },
   videoURL: { type: String },
-  Likes: { type: [
-    {
-        name: { type: String },
-        userName: { type: String }
-    }
-  ], required: true, default: [] },
+  likes: [{
+    id: { type: String },
+    name: { type: String },
+    userName: { type: String }
+  }],
   comments: [
     {
+      userId: { type: String },
       img: { type: String },
       name: { type: String },
       userName: { type: String },

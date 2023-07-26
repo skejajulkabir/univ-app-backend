@@ -31,6 +31,11 @@ app.use("/verify", verifyRouter1)
 
 
 
+// app.use((err , req , res , next)=>{
+//     console.log("Error: ", err);
+//     res.send(err);
+// })
+
 
 
 

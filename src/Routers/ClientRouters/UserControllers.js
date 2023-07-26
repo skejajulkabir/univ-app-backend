@@ -114,7 +114,7 @@ const loginUserCpntroller = async (req , res)=>{
           uid : user._id
         } ,
           "openSecretKey" , 
-          { expiresIn: '30m' });
+          { expiresIn: '1d' });
 
 
         res.status(200).send({"success": true , "message":"Login operation successful!" , token : token});

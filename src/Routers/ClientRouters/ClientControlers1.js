@@ -3,6 +3,7 @@ const Post = require('../../models/postModel');
 const Product = require('../../models/product');
 const User = require('../../models/userModel');
 const AvailableTshirtSize = require('../../models/availableTshirtSize')
+const Order = require('../../models/OrderModel')
 
 
 
@@ -123,6 +124,94 @@ const getAvailableTshirtSizeController = async (req,res)=>{
 
 
 
+const addOrderController = async (req,res)=>{
+    try {
+        const o = req.body;
+    
+          const {customer , cart} = o;
+  
+          const ordr = new Order({ customer , cart });
+    
+          const r = await ordr.save();
+    
+        res.status(200).json({ message: "post have been added successfully to the DB." , response : r});
+      } catch (error) {
+        console.error("Error saving data:", error);
+        res.status(500).json({ message: "Could not add order to the DB.", error });
+      }
+};
+
+
+
+const handleLikeController = async (req, res) => {
+    const { postId, name, userName } = req.body;
+  
+    try {
+      // Check if the post with the given postId exists
+      const post = await Post.findById(postId);
+  
+      if (!post) {
+        return res.status(404).json({ msg: 'Post not found' });
+      }
+  
+      // Check if the user already liked the post
+      const userLiked = post.likes.some(
+        (like) => like.name === name && like.userName === userName
+      );
+  
+      if (userLiked) {
+        // If the user already liked the post, remove the like
+        post.likes = post.likes.filter(
+          (like) => !(like.name === name && like.userName === userName)
+        );
+      } else {
+        // If the user hasn't liked the post, add the like
+        post.likes.push({ name, userName });
+      }
+  
+      // Save the updated post with the like
+      const r = await post.save();
+  
+      return res.status(200).json({ msg: 'Like updated successfully' , response : r});
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
+  
+
+
+
+  const handleCommentController = async (req, res) => {
+    const { postId, userId, img, name, userName, comment } = req.body;
+  
+    try {
+      // Check if the post with the given postId exists
+      const post = await Post.findById(postId);
+  
+      if (!post) {
+        return res.status(404).json({ msg: 'Post not found' });
+      }
+  
+      // Add the new comment to the post
+      const newComment = {
+        userId : userId,
+        img: img, 
+        name,
+        userName,
+        comment,
+      };
+      post.comments.push(newComment);
+  
+      // Save the updated post with the new comment
+      const updatedPost = await post.save();
+  
+      return res.status(200).json({ msg: 'Comment added successfully', updatedPost });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
 
 
 
@@ -134,4 +223,4 @@ const getAvailableTshirtSizeController = async (req,res)=>{
 
 
 
-module.exports = {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController};
+module.exports = {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController };
