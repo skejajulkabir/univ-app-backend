@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     
     userType: {type:String, default:"STUDENT"},
     info: {
-        bloodGroup : {type: String, required:true},
+        bloodGroup : {type: String},
         department : {type: String, required:true},
         roll : {type: Number, required:true , unique:true},
         admissionSession : {type: String, required:true},

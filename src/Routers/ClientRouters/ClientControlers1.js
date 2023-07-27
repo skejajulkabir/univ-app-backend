@@ -6,6 +6,11 @@ const AvailableTshirtSize = require('../../models/availableTshirtSize')
 const Order = require('../../models/OrderModel')
 
 
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+
 
 
 const getProductController = async (req,res)=>{
@@ -219,8 +224,104 @@ const handleLikeController = async (req, res) => {
 
 
 
+  //?update avatar
+
+
+
+
+
+  const uploadDir = path.join(__dirname, '../../../../Frontend/univ-app-frontend/public/uploads');
+  const avatarDir = path.join(uploadDir, 'avatars');
+
+  // Create parent directory if it doesn't exist
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+  }
+
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      // Create avatars directory if it doesn't exist
+      if (!fs.existsSync(avatarDir)) {
+        fs.mkdirSync(avatarDir);
+      }
+      cb(null, avatarDir);
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const fileExtension = path.extname(file.originalname);
+      cb(null, 'avatar-' + uniqueSuffix + fileExtension);
+    },
+  });
+
+  const upload = multer({ storage: storage }).single('avatar');
+
+  
+  const updateAvatarController = (req, res) => {
+    upload(req, res, async (err) => {
+      if (err) {
+        console.error('Error uploading avatar:', err);
+        return res.status(500).json({ error: 'Failed to upload avatar' , err});
+      }
+  
+      try {
+        const userId = '64a860179d28299f00c42a0c';
+        const user = await User.findById(userId);
+  
+        if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+        }
+  
+        if (req.file) {
+          if (user.avatar) {
+            try {
+              const avtrName = user.avatar.split('/')[3];
+              fs.unlinkSync(`${avatarDir}/${avtrName}`);
+            } catch (error) {
+              console.log(error);
+            }
+          }
+          console.log(avatarDir);
+          console.log(user.avatar);
+  
+          // Update the avatar field in the user document
+          user.avatar = `/uploads/avatars/${req.file.filename}`;
+          await user.save();
+
+          await Post.updateMany(
+            { 'author.userName': user.userName },
+            { 'author.image': user.avatar }
+          );
+  
+          return res.status(200).json({ message: 'Avatar updated successfully' , avatarURL : user.avatar });
+        } else {
+          return res.status(400).json({ error: 'No avatar file provided' });
+        }
+      } catch (error) {
+        console.error('Error updating avatar:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+  };
+
+
+  
+
+
+
+
+
+
+
+
+
+
 // const getProductController = async (req,res)=>{};
 
 
 
-module.exports = {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController };
+
+
+
+
+
+module.exports = {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController , updateAvatarController };

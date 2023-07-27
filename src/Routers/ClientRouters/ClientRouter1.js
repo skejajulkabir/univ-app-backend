@@ -1,7 +1,7 @@
 const express = require('express');
 
 // importing controllers
-const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController} = require('./ClientControlers1')
+const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController , updateAvatarController} = require('./ClientControlers1')
 
 const {addUserController , getUserController , loginUserCpntroller , getUserByIdController} = require('./UserControllers')
 
@@ -30,6 +30,7 @@ ClientRouter1.get('/getposts', getPostController);
 ClientRouter1.get('/getrightsidebaruserlist', getRightSidebarUserListController);
 ClientRouter1.post('/like', handleLikeController);
 ClientRouter1.post('/comment', handleCommentController);
+ClientRouter1.post('/updateavatar', updateAvatarController);
 
 
 module.exports = ClientRouter1;
