@@ -27,6 +27,7 @@ const productSchema = new mongoose.Schema({
   // color: { type: Array , default: []},
   price: { type: Number , required: true },
   // availableQty: { type: Number, required: true },
+  status: { type: String, required: true , default : 'active' },
   reviews : {type : [
     {
       name: { type: String },

@@ -6,6 +6,7 @@ const postSchema = new mongoose.Schema({
     image: { type: String },
     userName: { type: String, required: true },
     role: [{ type: String }],
+    id : { type: String},
   },
   caption : { type: String, required: true},
   typeOfThePost: { type: String, required: true },
