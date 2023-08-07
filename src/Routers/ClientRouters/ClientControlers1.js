@@ -280,6 +280,20 @@ const updateAvatarController = (req, res) => {
   });
 };
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // const getProductController = async (req,res)=>{};
 
 module.exports = {

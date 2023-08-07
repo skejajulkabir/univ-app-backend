@@ -9,7 +9,7 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     userName: { type: String, required: true , unique: true },
-    avatar: { type: String , default: "none" },
+    avatar: { type: String , default: "/utils/defaultDP.jpg" },
     regularEmail: { type: String, required: true , unique: true },
     password: { type: String, required: true },
     role: {type: Array , default:['STUDENT']},
@@ -45,8 +45,40 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
+
+
+// Define an index to enable efficient searching
+userSchema.index(
+    {
+      name: "text",
+      userName: "text",
+      "info.bloodGroup": "text",
+      "info.department": "text",
+      "info.roll": "text",
+      "info.admissionSession": "text",
+      "info.from": "text",
+      "info.currentLocation": "text",
+    },
+    {
+      name: "user_search_index",
+      weights: {
+        // You can adjust the weights to give priority to certain fields
+        name: 10,
+        userName: 5,
+        "info.bloodGroup": 1,
+        "info.department": 1,
+        "info.roll": 1,
+        "info.admissionSession": 1,
+        "info.from": 1,
+        "info.currentLocation": 1,
+      },
+    }
+  );
+
+
 userSchema.index({ 'userName': 1 , 'regularEmail' : 1}, { unique: true }); // Apply compound unique index
 // userSchema.createIndexes();
+
 
 mongoose.models = {};
 module.exports = mongoose.model("User", userSchema);

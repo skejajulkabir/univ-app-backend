@@ -9,6 +9,7 @@ const postSchema = new mongoose.Schema({
     id : { type: String},
   },
   caption : { type: String, required: true},
+  postCategory : { type: String, required: true , default : "FEED"},
   typeOfThePost: { type: String, required: true },
   imgURL: { type: String },
   videoURL: { type: String },

@@ -7,6 +7,10 @@ const otpVerificationSchema = new mongoose.Schema({
     required: true,
   },
   otp: {
+    type: Number,
+    required: true,
+  },
+  mail: {
     type: String,
     required: true,
   },

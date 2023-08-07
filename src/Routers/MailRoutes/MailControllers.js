@@ -4,6 +4,10 @@ const Mailgen = require("mailgen");
 
 //importing models
 const OtpVerification = require("../../models/OtpVarificationModel");
+const User = require("../../models/userModel");
+
+
+
 
 // Function to generate OTP
 const generateOTP = () => {
@@ -13,8 +17,14 @@ const generateOTP = () => {
   return Math.floor(Math.random() * (99999999 - 11111111 + 1)) + 11111111;
 };
 
+
+
+
+
+
+
 const sendOTPhandler = async (req, res) => {
-  const { userEmail , users_id } = req.body;
+  const { userEmail, users_id } = req.body;
 
   let config = {
     service: "gmail",
@@ -42,14 +52,15 @@ const sendOTPhandler = async (req, res) => {
 
     // Save OTP and its expiry in the OTP verification model
     try {
-        const otpVerification = new OtpVerification({
-            user: users_id,
-            otp,
-            expiry: otpExpiry,
-          });
-          await otpVerification.save();
+      const otpVerification = new OtpVerification({
+        user: users_id,
+        mail: userEmail,
+        otp,
+        expiry: otpExpiry,
+      });
+      await otpVerification.save();
     } catch (error) {
-        console.error({msg : "could not save the otp to the db.",error});
+      console.error({ msg: "could not save the otp to the db.", error });
     }
 
     let response = {
@@ -90,90 +101,60 @@ const sendOTPhandler = async (req, res) => {
 
 
 
-module.exports = { sendOTPhandler };
+
+
+
+const verifyOTPhandler = async (req, res) => {
+    const { userID , userEmail ,  otp } = req.body;
+  
+    try {
+      // Find the OTP verification entry for the user
+      const otpVerification = await OtpVerification.findOne({ user: userID });
+  
+      if (!otpVerification) {
+        return res.status(404).json({ error: "OTP verification entry not found." });
+      }
+  
+      // Check if the OTP provided by the user matches the stored OTP
+      if (otpVerification.otp !== parseInt(otp)) {
+        return res.status(400).json({ error: "Invalid OTP." });
+      }
+  
+      // Check if the OTP has expired
+      const currentTime = new Date();
+      if (currentTime > otpVerification.expiry) {
+        // OTP has expired
+        return res.status(400).json({ error: "OTP has expired. Please request a new OTP." });
+      }
+  
+      // Mark the user as verified
+      const user = await User.findOneAndUpdate({ _id : userID }, { isVarified : true });
+  
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found." });
+      }
+  
+      // Delete the OTP verification entry from the database as it is no longer needed
+      await OtpVerification.deleteOne({ user: userID });
+  
+      return res.status(200).json({ msg: "Email verified successfully." });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Error verifying OTP." });
+    }
+  };
 
 
 
 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
 
-// const sendOTPhandler = (req, res) => {
 
-//     const { userEmail } = req.body;
 
-//     let config = {
-//         service : 'gmail',
-//         auth : {
-//             user: process.env.EMAIL_ADDRESS,
-//             pass: process.env.EMAIL_PASSWORD
-//         }
-//     }
 
-//     let transporter = nodemailer.createTransport(config);
 
-//     let MailGenerator = new Mailgen({
-//         theme: "default",
-//         product : {
-//             name: "SK EJAJUL KABIR",
-//             link : 'https://mailgen.js/'
-//         }
-//     })
 
-//     let response = {
-//         body: {
-//             name : userEmail,
-//             intro: `You have an OTP request and the OTP is, ${Math.floor(Math.random() * (999999 - 111111 + 1)) + 111111}`,
-//             outro: "Looking forward to do more business"
-//         }
-//     }
 
-//     let mail = MailGenerator.generate(response)
 
-//     let message = {
-//         from : process.env.EMAIL_ADDRESS,
-//         to : userEmail,
-//         subject: "Varify your email address in JUSTIAN.XYZ",
-//         html: mail
-//     }
-
-//     transporter.sendMail(message).then((r) => {
-//         return res.status(201).json({
-//             msg: "you should receive an email",
-//             r
-//         })
-//     }).catch(error => {
-//         return res.status(500).json({ error })
-//     })
-
-//     // res.status(201).json("getBill Successfully...!");
-// }
+module.exports = { sendOTPhandler ,  verifyOTPhandler };
