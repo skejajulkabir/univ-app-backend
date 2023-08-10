@@ -10,16 +10,20 @@ const addUserController = async (req, res) => {
 
   const regularEmailValidation =await User.findOne({"regularEmail" : req.body.regularEmail});
   const userNameValidation = await User.findOne({"userName" : req.body.userName});
-  const userRollValidation = await User.findOne({"info.roll" : req.body.info.roll});
+  // const userRollValidation = await User.findOne({"info.roll" : req.body.info.roll});
   // console.log(userRollValidation , req.body)
 
   if(regularEmailValidation) {
     res.status(500).json({message : "This email is already used in an account! Email has to be unique!"});
+    return
   }else if (userNameValidation){
-    res.status(500).json({message : "This username is already used in an account! Email has to be unique!"});
-  }else if (userRollValidation){
-    res.status(500).json({message : "This roll is already used in an account! Email has to be unique!"});
+    res.status(500).json({message : "This username is already used in an account! username has to be unique!"});
+    return
   }
+  // else if (userRollValidation){
+  //   res.status(500).json({message : "This roll is already used in an account! Email has to be unique!"});
+  //   return
+  // }
   
   
   else{
@@ -37,6 +41,7 @@ const addUserController = async (req, res) => {
       } = newUser;
 
       const {
+        bloodGroup ,
         department,
         roll,
         admissionSession,
@@ -61,6 +66,7 @@ const addUserController = async (req, res) => {
         regularEmail,
         userType,
         info: {
+          bloodGroup,
           department,
           roll,
           admissionSession,
@@ -170,7 +176,88 @@ const getUserByIdController = async (req,res)=>{
 
 
 
-module.exports = { addUserController , getUserController ,loginUserCpntroller , getUserByIdController };
+
+
+const updateUserController = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const updatedUser = req.body.user;
+
+    const {
+      name,
+      userName,
+      regularEmail,
+      userType,
+      info,
+      contact,
+    } = updatedUser;
+
+    const {
+      bloodGroup,
+      department,
+      roll,
+      admissionSession,
+      currentLocation,
+      Gender,
+      from,
+    } = info;
+
+    const { phoneNumber, Facebook, LinkedIn, insta, YouTube, Discord } =
+      contact;
+
+    const user = await User.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.name = name;
+    user.userName = userName;
+    user.regularEmail = regularEmail;
+    user.userType = userType;
+    user.info = {
+      bloodGroup,
+      department,
+      roll,
+      admissionSession,
+      currentLocation,
+      Gender,
+      from,
+    };
+    user.contact = {
+      phoneNumber: {
+        Number: phoneNumber.Number,
+        isPublic: phoneNumber.isPublic,
+      },
+      Facebook,
+      LinkedIn,
+      insta,
+      YouTube,
+      Discord,
+    };
+
+    await user.save();
+
+    res.status(200).json({ message: 'User information updated successfully' });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: 'Could not update user information', error });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { addUserController , getUserController ,loginUserCpntroller , getUserByIdController , updateUserController };
 
 
 

@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     info: {
         bloodGroup : {type: String},
         department : {type: String, required:true},
-        roll : {type: Number, required:true , unique:true},
+        roll : {type: Number, required:true },
         admissionSession : {type: String, required:true},
         currentLocation : {type: String, required:true},
         Gender : {type: String, required:true},

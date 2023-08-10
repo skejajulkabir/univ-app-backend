@@ -14,6 +14,10 @@ const otpVerificationSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  regularEmail: {
+    type: String,
+    required: true,
+  },
   expiry: {
     type: Date,
     required: true,

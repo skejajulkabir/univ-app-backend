@@ -24,7 +24,7 @@ const generateOTP = () => {
 
 
 const sendOTPhandler = async (req, res) => {
-  const { userEmail, users_id } = req.body;
+  const { userEmail, regularEmail ,  users_id } = req.body;
 
   let config = {
     service: "gmail",
@@ -53,6 +53,7 @@ const sendOTPhandler = async (req, res) => {
     // Save OTP and its expiry in the OTP verification model
     try {
       const otpVerification = new OtpVerification({
+        regularEmail,
         user: users_id,
         mail: userEmail,
         otp,
@@ -105,7 +106,7 @@ const sendOTPhandler = async (req, res) => {
 
 
 const verifyOTPhandler = async (req, res) => {
-    const { userID , userEmail ,  otp } = req.body;
+    const { userID  ,  otp } = req.body;
   
     try {
       // Find the OTP verification entry for the user
