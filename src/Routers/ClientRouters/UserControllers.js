@@ -254,10 +254,53 @@ const updateUserController = async (req, res) => {
 
 
 
+const updatePasswordController = async (req, res) => {
+
+  try {
+    const { oldPassword, newPassword , userId } = req.body;
+
+    const user = await User.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Decrypt the stored password to compare with the oldPassword
+    const bytes  = CryptoJS.AES.decrypt(user.password, 'secret key 123');
+    const dbPass = bytes.toString(CryptoJS.enc.Utf8);
+
+    if (oldPassword !== dbPass) {
+      return res.status(400).json({ message: 'Old password does not match' });
+    }
+
+    // Encrypt the new password
+    const encryptedPassword = CryptoJS.AES.encrypt(newPassword, 'secret key 123').toString();
+    user.password = encryptedPassword;
+
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    res.status(500).json({ message: 'Could not update password', error });
+  }
+};
 
 
 
-module.exports = { addUserController , getUserController ,loginUserCpntroller , getUserByIdController , updateUserController };
+
+
+//! the forgotPassword controller is located at mailController.js file
+//? the forgotPassword controller is located at mailController.js file
+//! the forgotPassword controller is located at mailController.js file
+//? the forgotPassword controller is located at mailController.js file
+
+
+
+
+
+
+module.exports = { addUserController , getUserController ,loginUserCpntroller , getUserByIdController , updateUserController , updatePasswordController };
 
 
 

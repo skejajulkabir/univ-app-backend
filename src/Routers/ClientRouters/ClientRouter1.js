@@ -3,7 +3,7 @@ const express = require('express');
 // importing controllers
 const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController , updateAvatarController} = require('./ClientControlers1')
 
-const {addUserController , getUserController , loginUserCpntroller , getUserByIdController , updateUserController} = require('./UserControllers')
+const {addUserController , getUserController , loginUserCpntroller , getUserByIdController , updateUserController , updatePasswordController } = require('./UserControllers')
 
 // Importing mongoose models
 // const Product = require("../../models/product");
@@ -22,6 +22,7 @@ ClientRouter1.post('/addorder', addOrderController);
 ClientRouter1.get('/getuser', getUserController);
 ClientRouter1.get('/getuserbyid/:id', getUserByIdController);
 ClientRouter1.post('/adduser', addUserController);
+ClientRouter1.post('/updatepassword', updatePasswordController);
 ClientRouter1.put('/updateuser/:id', updateUserController);
 ClientRouter1.post('/user/login', loginUserCpntroller);
 

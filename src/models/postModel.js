@@ -27,6 +27,7 @@ const postSchema = new mongoose.Schema({
       comment: { type: String },
     },
   ],
+  postType : {type : String , default : "FEED_POST"}
 }, { timestamps: true });
 
 mongoose.models = {};
