@@ -50,9 +50,9 @@ const createPostController = async (req, res) => {
   try {
     const post = req.body;
 
-    const { author, caption, typeOfThePost, imgURL, videoURL } = post;
+    const { author, caption, typeOfThePost, imgURL, videoURL , postType } = post;
 
-    const pst = new Post({ author, caption, typeOfThePost, imgURL, videoURL });
+    const pst = new Post({ author, caption, typeOfThePost, imgURL, videoURL , postType });
 
     await pst.save();
 
@@ -294,6 +294,65 @@ const updateAvatarController = (req, res) => {
 
 
 
+
+
+const getBloodDonationPostController = async (req, res) => {
+  try {
+    if (req.query.page && req.query.limit) {
+      let page = parseInt(req.query.page);
+      let limit = parseInt(req.query.limit);
+
+      let skip = (page - 1) * limit;
+
+      let notices = await Post.find({ "postType" : "BLOOD_DONATION_POST" })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({ notices });
+
+      return;
+    }
+    let notices = await Post.find({ "postType" : "BLOOD_DONATION_POST" }).sort({ createdAt: -1 });
+    res.status(200).json({ notices });
+  } catch (error) {
+    res.status(400).json({ message: "could not find notices.", error });
+  }
+};
+
+
+
+const getNoticeController = async (req, res) => {
+  try {
+    if (req.query.page && req.query.limit) {
+      let page = parseInt(req.query.page);
+      let limit = parseInt(req.query.limit);
+
+      let skip = (page - 1) * limit;
+
+      let notices = await Post.find({ "postType" : "NOTICE_POST" })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({ notices });
+
+      return;
+    }
+    let notices = await Post.find({ "postType" : "NOTICE_POST" }).sort({ createdAt: -1 });
+    res.status(200).json({ notices });
+  } catch (error) {
+    res.status(400).json({ message: "could not find notices.", error });
+  }
+};
+
+
+
+
+
+
+
+
 // const getProductController = async (req,res)=>{};
 
 module.exports = {
@@ -307,4 +366,6 @@ module.exports = {
   handleLikeController,
   handleCommentController,
   updateAvatarController,
+  getNoticeController , 
+  getBloodDonationPostController
 };
