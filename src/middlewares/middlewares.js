@@ -9,7 +9,6 @@ const isAdmin = async (req , res , next)=>{
         const token = req.headers.authorization.split(' ')[1];
         const tokenResponse = jwt.verify(token, 'openSecretKey');
         const { name , username , uid } = tokenResponse;
-        console.log(tokenResponse)
     
         // let usr = await authorisedUser.find({ "id" : uid });
     

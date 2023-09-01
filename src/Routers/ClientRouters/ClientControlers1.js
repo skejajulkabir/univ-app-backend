@@ -91,7 +91,7 @@ const getPostController = async (req, res) => {
 
 const getRightSidebarUserListController = async (req, res) => {
   try {
-    let users = await User.find().select("name userName avatar");
+    let users = await User.find().select("name userName avatar").limit(10);
     res.status(200).json({ users });
   } catch (error) {
     res.status(400).json({ message: "could not find posts.", error });
@@ -225,6 +225,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }).single("avatar");
 
 const updateAvatarController = (req, res) => {
+
   upload(req, res, async (err) => {
     if (err) {
       console.error("Error uploading avatar:", err);
@@ -232,7 +233,7 @@ const updateAvatarController = (req, res) => {
     }
 
     try {
-      const userId = "64a860179d28299f00c42a0c";
+      const userId = req.params.uID;
       const user = await User.findById(userId);
 
       if (!user) {
@@ -353,6 +354,36 @@ const getNoticeController = async (req, res) => {
 
 
 
+const getOneUsersPostController = async (req, res) => {
+
+  const userId = req.params.id;
+
+  try {
+    if (req.query.page && req.query.limit) {
+      let page = parseInt(req.query.page);
+      let limit = parseInt(req.query.limit);
+
+      let skip = (page - 1) * limit;
+
+      let paginatedPosts = await Post.find({ "author.id" : userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({ paginatedPosts });
+
+      return;
+    }
+    let posts = await Post.find({ "author.id" : userId }).sort({ createdAt: -1 });
+    res.status(200).json({ posts });
+  } catch (error) {
+    res.status(400).json({ message: "could not find posts.", error });
+  }
+};
+
+
+
+
 // const getProductController = async (req,res)=>{};
 
 module.exports = {
@@ -367,5 +398,6 @@ module.exports = {
   handleCommentController,
   updateAvatarController,
   getNoticeController , 
-  getBloodDonationPostController
+  getBloodDonationPostController,
+  getOneUsersPostController
 };

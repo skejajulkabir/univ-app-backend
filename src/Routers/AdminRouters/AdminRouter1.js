@@ -3,7 +3,7 @@ const { isAdmin } = require('../../middlewares/middlewares')
 
 
 // requiring controllers
-const { addproductsController , updateproductController , deleteProductController , addSizesController , getOrdersHandler } = require('./AdminControlers1');
+const { addproductsController , updateproductController , deleteProductController , addSizesController , getOrdersHandler, updateOrderController } = require('./AdminControlers1');
 
 
 
@@ -17,6 +17,7 @@ AdminRouter1.delete('/deleteproduct/:id', deleteProductController );
 
 
 AdminRouter1.get('/getorders', getOrdersHandler );
+AdminRouter1.put('/updateorder', isAdmin , updateOrderController );
 
 
 

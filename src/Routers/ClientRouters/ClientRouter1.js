@@ -1,7 +1,7 @@
 const express = require('express');
 
 // importing controllers
-const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController , updateAvatarController , getNoticeController , getBloodDonationPostController} = require('./ClientControlers1')
+const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController , updateAvatarController , getNoticeController , getBloodDonationPostController, getOneUsersPostController} = require('./ClientControlers1')
 
 const {addUserController , getUserController , loginUserCpntroller , getUserByIdController , updateUserController , updatePasswordController } = require('./UserControllers')
 
@@ -29,12 +29,13 @@ ClientRouter1.post('/user/login', loginUserCpntroller);
 
 ClientRouter1.post('/createpost', createPostController);
 ClientRouter1.get('/getposts', getPostController);
+ClientRouter1.get('/getusersposts/:id', getOneUsersPostController);
 ClientRouter1.get('/getnotice', getNoticeController);
 ClientRouter1.get('/getbloodnotice', getBloodDonationPostController);
 ClientRouter1.get('/getrightsidebaruserlist', getRightSidebarUserListController);
 ClientRouter1.post('/like', handleLikeController);
 ClientRouter1.post('/comment', handleCommentController);
-ClientRouter1.post('/updateavatar', updateAvatarController);
+ClientRouter1.post('/updateavatar/:uID', updateAvatarController);
 
 
 module.exports = ClientRouter1;

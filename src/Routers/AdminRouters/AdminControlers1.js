@@ -182,6 +182,36 @@ const getOrdersHandler = async (req, res) => {
 
 
 
+const updateOrderController = async (req, res) => {
+  const oID = req.body.oID; // Assuming your order ID is stored in _id field
+  const updatedStatus = req.body.updatedStatus;
+
+  try {
+    const updatedOrder = await Order.findOneAndUpdate(
+      { _id: oID },
+      { status: updatedStatus },
+      { new: true } // This option returns the updated document
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: "Order not found." });
+    }
+
+    res.status(200).json({ message: "Order updated successfully.", order: updatedOrder });
+  } catch (error) {
+    res.status(400).json({ message: "Could not update the order.", error });
+  }
+};
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -200,4 +230,5 @@ module.exports = {
   deleteProductController,
   addSizesController,
   getOrdersHandler,
+  updateOrderController
 };
