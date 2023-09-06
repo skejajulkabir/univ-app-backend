@@ -3,7 +3,7 @@ const { isAdmin } = require('../../middlewares/middlewares')
 
 
 // requiring controllers
-const { addproductsController , updateproductController , deleteProductController , addSizesController , getOrdersHandler, updateOrderController } = require('./AdminControlers1');
+const { addproductsController , updateproductController , deleteProductController , addSizesController , getOrdersHandler, updateOrderController , updateSizeController, deleteSizeController } = require('./AdminControlers1');
 
 
 
@@ -24,5 +24,7 @@ AdminRouter1.put('/updateorder', isAdmin , updateOrderController );
 
 
 AdminRouter1.post('/addsizes', addSizesController );
+AdminRouter1.put('/updatesize', updateSizeController );
+AdminRouter1.delete('/deletesize', deleteSizeController );
 
 module.exports = AdminRouter1;

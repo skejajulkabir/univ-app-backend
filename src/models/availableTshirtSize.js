@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 
 const availableTshirtSizeSchema = new mongoose.Schema({
-    name : {type: String, required: true},
+    name : {type: String, required: true , unique: true },
     data : [
         {
             size : {type : String , required: true},

@@ -163,6 +163,53 @@ const addSizesController = async (req, res) => {
 };
 
 
+const updateSizeController = async (req, res) => {
+  const oID = req.body._id; 
+
+  try {
+    const updatedSize = await AvailableTshirtSize.findOneAndUpdate(
+      { _id: oID },
+      req.body,
+      { new: true }
+    );
+
+    if (!updatedSize) {
+      return res.status(404).json({ message: "Size not found." });
+    }
+
+    res.status(200).json({ message: "Size updated successfully.", size: updatedSize });
+  } catch (error) {
+    res.status(400).json({ message: "Could not update the Size.", error });
+  }
+};
+
+
+
+
+
+
+
+
+const deleteSizeController = async (req, res) => {
+  console.log(req.body);
+  const oID = req.body.OId; 
+
+  try {
+    const deletedSize = await AvailableTshirtSize.findOneAndDelete(
+      { _id: oID }
+    );
+
+
+    if (!deletedSize) {
+      return res.status(404).json({ message: "Size not found." });
+    }
+
+    res.status(200).json({ message: "Size deleted successfully.", deletedSize: deletedSize });
+  } catch (error) {
+    res.status(400).json({ message: "Could not delete the Size.", error });
+  }
+};
+
 
 
 
@@ -230,5 +277,7 @@ module.exports = {
   deleteProductController,
   addSizesController,
   getOrdersHandler,
-  updateOrderController
+  updateOrderController,
+  updateSizeController,
+  deleteSizeController
 };
