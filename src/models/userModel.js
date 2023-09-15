@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     userName: { type: String, required: true , unique: true },
     avatar: { type: String , default: "/utils/defaultDP.jpg" },
     regularEmail: { type: String, required: true , unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true , select : false },
     role: {type: Array , default:['STUDENT']},
     awards: [{
         name:{type: String},
@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema({
         description: {type:String},
     }],
     isVarified: {type:Boolean, default:false , required:true},
-    
     userType: {type:String, default:"STUDENT"},
     info: {
         bloodGroup : {type: String},

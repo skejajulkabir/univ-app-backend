@@ -102,22 +102,25 @@ const addUserController = async (req, res) => {
 
 
 
+
 const loginUserCpntroller = async (req , res)=>{
   try {
-    const user = await User.findOne({"regularEmail" : req.body.regularEmail});
-    // console.log(user);
+    const user = await User.findOne({"regularEmail" : req.body.regularEmail}).select("password regularEmail name _id role userType ");
+    console.log(user);
     if (user) {
       // Decrypt
       const bytes  = CryptoJS.AES.decrypt(user.password, 'secret key 123');
       const dbPass = bytes.toString(CryptoJS.enc.Utf8);
-      // console.log(dbPass);
+      console.log(dbPass);
       // CryptoJS.AES.decrypt(user.password, 'secret key 123').toString(CryptoJS.enc.Utf8);
       if (req.body.regularEmail === user.regularEmail && req.body.password === dbPass) {
         //success
         const token = jwt.sign({
           name : user.name ,
           username : user.userName,
-          uid : user._id
+          uid : user._id,
+          roles : user.role,
+          userType : user.userType
         } ,
           "openSecretKey" , 
           { expiresIn: '1d' });
@@ -259,12 +262,14 @@ const updatePasswordController = async (req, res) => {
   try {
     const { oldPassword, newPassword , userId } = req.body;
 
-    const user = await User.findOne({ _id: userId });
+    const user = await User.findOne({ _id: userId }).select("password ");
 
+    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
+    
+    console.log(user);
     // Decrypt the stored password to compare with the oldPassword
     const bytes  = CryptoJS.AES.decrypt(user.password, 'secret key 123');
     const dbPass = bytes.toString(CryptoJS.enc.Utf8);

@@ -50,20 +50,36 @@ const createPostController = async (req, res) => {
   try {
     const post = req.body;
 
-    const { author, caption, typeOfThePost, imgURL, videoURL , postType } = post;
+    const { author, caption, typeOfThePost, imgURL, videoURL, postType } = post;
 
-    const pst = new Post({ author, caption, typeOfThePost, imgURL, videoURL , postType });
+    // Find the author by _id
+    const authorUser = await User.findById(author);
 
-    await pst.save();
+    if (!authorUser) {
+      return res.status(404).json({ message: "Author not found." });
+    }
+
+    // Create the post with the author's information
+    const newPost = new Post({
+      author: authorUser, // Set the author field to the authorUser object
+      caption,
+      typeOfThePost,
+      imgURL,
+      videoURL,
+      postType,
+    });
+
+    await newPost.save();
 
     res
       .status(200)
-      .json({ message: "post have been added successfully to the DB." });
+      .json({ message: "Post has been added successfully to the DB." });
   } catch (error) {
     console.error("Error saving data:", error);
     res.status(500).json({ message: "Could not add post to the DB.", error });
   }
 };
+
 
 const getPostController = async (req, res) => {
   try {
@@ -74,9 +90,11 @@ const getPostController = async (req, res) => {
       let skip = (page - 1) * limit;
 
       let paginatedPosts = await Post.find()
+        .populate("author")
+        .select('-password')
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit);
+        .limit(limit)
 
       res.status(200).json({ paginatedPosts });
 

@@ -1,7 +1,11 @@
 // Importing mongoose models
 const Product = require("../../models/product");
 const AvailableTshirtSize = require("../../models/availableTshirtSize");
+const User = require("../../models/userModel");
 const Order = require('../../models/OrderModel')
+
+
+const jwt = require('jsonwebtoken');
 
 // const updateproductController = async (req,res)=>{};
 
@@ -192,7 +196,7 @@ const updateSizeController = async (req, res) => {
 
 const deleteSizeController = async (req, res) => {
   console.log(req.body);
-  const oID = req.body.OId; 
+  const oID = req.body.OId; I
 
   try {
     const deletedSize = await AvailableTshirtSize.findOneAndDelete(
@@ -255,7 +259,39 @@ const updateOrderController = async (req, res) => {
 
 
 
+  const addRolesController = async (req , res) =>{
+    
+    const {usrID , userRole} = req.body;
+    
+    
 
+
+
+    const token = req.headers.authorization.split(' ')[1];
+    const tokenResponse = jwt.verify(token, 'openSecretKey');
+    
+    if(!tokenResponse.roles.includes("admin")){
+      res.status(403).json({ message : "You don't have permission to add roles."});
+      return
+    }
+
+    try {
+      const Usr = await User.findById(usrID);
+
+      if(!Usr){
+        res.status(404).json({ message : "User not found."});
+        return
+      }
+      Usr.role.push(userRole);
+
+      const newUsr = await Usr.save();
+  
+      res.status(200).json({ message: "Role added successfully.", user : newUsr });
+    } catch (error) {
+      res.status(400).json({ message: "there was a problem adding the role...", error });
+    }
+
+  }
 
 
 
@@ -279,5 +315,6 @@ module.exports = {
   getOrdersHandler,
   updateOrderController,
   updateSizeController,
-  deleteSizeController
+  deleteSizeController,
+  addRolesController
 };

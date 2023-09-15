@@ -13,8 +13,8 @@ const jwt = require('jsonwebtoken');
       const { exp } = tokenResponse;
       const currentTimestamp = Math.floor(Date.now() / 1000);
       console.log(tokenResponse);
-      console.log(exp);
-      console.log(Date.now());
+      // console.log(exp);
+      // console.log(Date.now());
       
       if (currentTimestamp >= exp) {
         console.log('Token has expired');
