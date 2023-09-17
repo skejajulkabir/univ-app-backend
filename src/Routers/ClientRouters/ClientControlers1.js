@@ -50,6 +50,8 @@ const createPostController = async (req, res) => {
   try {
     const post = req.body;
 
+    console.log(post);
+
     const { author, caption, typeOfThePost, imgURL, videoURL, postType } = post;
 
     // Find the author by _id
@@ -149,7 +151,9 @@ const handleLikeController = async (req, res) => {
 
   try {
     // Check if the post with the given postId exists
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId)
+    .populate("author")
+    .select("-password");
 
     if (!post) {
       return res.status(404).json({ msg: "Post not found" });
