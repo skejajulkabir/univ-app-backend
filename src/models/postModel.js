@@ -17,10 +17,11 @@ const postSchema = new mongoose.Schema({
   }],
   comments: [
     {
-      userId: { type: String },
-      img: { type: String },
-      name: { type: String },
-      userName: { type: String },
+      commenter: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
       comment: { type: String },
     },
   ],

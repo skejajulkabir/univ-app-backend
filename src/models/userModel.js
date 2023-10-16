@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
     regularEmail: { type: String, required: true , unique: true },
     password: { type: String, required: true , select : false },
     role: {type: Array , default:['STUDENT']},
+    permissions: {type: Array , default:[]},
     awards: [{
         name:{type: String},
         givenBy:{type: String},

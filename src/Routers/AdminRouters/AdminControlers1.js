@@ -149,22 +149,21 @@ const deleteProductController = async (req, res) => {
 
 const addSizesController = async (req, res) => {
   try {
-    const s = req.body;
+    const { name, data } = req.body;
 
-    const { name, data } = s;
+    const newSize = new AvailableTshirtSize({ name, data });
 
-    const pst = new AvailableTshirtSize({ name, data });
-
-    await pst.save();
+    await newSize.save();
 
     res
       .status(200)
-      .json({ message: "post have been added successfully to the DB." });
+      .json({ message: "Sizes have been added successfully to the DB." });
   } catch (error) {
     console.error("Error saving data:", error);
-    res.status(500).json({ message: "Could not add size to the DB.", error });
+    res.status(500).json({ message: "Could not add sizes to the DB.", error });
   }
 };
+
 
 
 const updateSizeController = async (req, res) => {

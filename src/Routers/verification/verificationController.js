@@ -12,7 +12,7 @@ const jwt = require('jsonwebtoken');
       const tokenResponse = jwt.verify(token, 'openSecretKey');
       const { exp } = tokenResponse;
       const currentTimestamp = Math.floor(Date.now() / 1000);
-      console.log(tokenResponse);
+      // console.log(tokenResponse);
       // console.log(exp);
       // console.log(Date.now());
       

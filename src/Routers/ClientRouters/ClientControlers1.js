@@ -22,10 +22,16 @@ const getProductController = async (req, res) => {
         .skip(skip)
         .limit(limit);
 
-      res.status(200).json({ paginatedProducts });
+      // Check if there are more posts available
+      const totalProductsCount = await Product.countDocuments();
+      const remainingProducts = totalProductsCount - (skip + limit);
+      const hasMore = remainingProducts > 0;
+
+      res.status(200).json({ paginatedProducts , hasMore });
 
       return;
     }
+
     let products = await Product.find().sort({ createdAt: -1 });
     res.status(200).json({ products });
   } catch (error) {
@@ -82,7 +88,6 @@ const createPostController = async (req, res) => {
   }
 };
 
-
 const getPostController = async (req, res) => {
   try {
     if (req.query.page && req.query.limit) {
@@ -92,13 +97,25 @@ const getPostController = async (req, res) => {
       let skip = (page - 1) * limit;
 
       let paginatedPosts = await Post.find()
-        .populate("author")
-        .select('-password')
+        .populate({
+          path: "author",
+          select: "-password -info -contact", // Include only the fields you need
+        })
+        .populate({
+          path: "comments.commenter",
+          select: "name avatar userName", // Include only the fields you need
+        })
+        .select("-password -info -contact")
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit)
+        .limit(limit);
 
-      res.status(200).json({ paginatedPosts });
+      // Check if there are more posts available
+      const totalPostsCount = await Post.countDocuments();
+      const remainingPosts = totalPostsCount - (skip + limit);
+      const hasMore = remainingPosts > 0;
+
+      res.status(200).json({ paginatedPosts ,  hasMore});
 
       return;
     }
@@ -134,12 +151,10 @@ const addOrderController = async (req, res) => {
 
     const r = await ordr.save();
 
-    res
-      .status(200)
-      .json({
-        message: "post have been added successfully to the DB.",
-        response: r,
-      });
+    res.status(200).json({
+      message: "post have been added successfully to the DB.",
+      response: r,
+    });
   } catch (error) {
     console.error("Error saving data:", error);
     res.status(500).json({ message: "Could not add order to the DB.", error });
@@ -152,8 +167,16 @@ const handleLikeController = async (req, res) => {
   try {
     // Check if the post with the given postId exists
     const post = await Post.findById(postId)
-    .populate("author")
-    .select("-password");
+      .populate({
+        path: "author",
+
+        select: "-password -info -contact", // Include only the fields you need
+      })
+      .populate({
+        path: "comments.commenter",
+        select: "name avatar userName", // Include only the fields you need
+      })
+      .select("-password -info -contact");
 
     if (!post) {
       return res.status(404).json({ msg: "Post not found" });
@@ -191,28 +214,102 @@ const handleCommentController = async (req, res) => {
 
   try {
     // Check if the post with the given postId exists
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId)
+      .populate({
+        path: "author",
+        select: "-password -info -contact", // Include only the fields you need
+      })
+      .populate({
+        path: "comments.commenter",
+        select: "name avatar userName", // Include only the fields you need
+      }) // Update the population to include "comments.commenter"
+      .select("-password -info -contact");
 
     if (!post) {
       return res.status(404).json({ msg: "Post not found" });
     }
 
+    // Validate input data
+    if (!userId || !img || !name || !userName || !comment) {
+      return res.status(400).json({ msg: "Invalid comment data" });
+    }
+
     // Add the new comment to the post
     const newComment = {
-      userId: userId,
-      img: img,
-      name,
-      userName,
+      commenter: userId, // Assuming `userId` is the commenter's ID
       comment,
     };
     post.comments.push(newComment);
 
     // Save the updated post with the new comment
-    const updatedPost = await post.save();
+    const responsePost = await post.save();
+
+    const updatedPost = await responsePost.populate({
+      path: "comments.commenter",
+      select: " name avatar userName",
+    });
 
     return res
       .status(200)
       .json({ msg: "Comment added successfully", updatedPost });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: "Internal server error" });
+  }
+};
+
+const handleDeleteCommentController = async (req, res) => {
+  const { postId, commentId, userId } = req.body;
+
+  console.log(req.body);
+
+  try {
+    // Check if the post with the given postId exists
+    const post = await Post.findById(postId)
+      .populate({
+        path: "comments.commenter",
+        select: " name avatar username",
+      })
+      .populate({
+        path: "author",
+        select: "-password -info -contact",
+      });
+
+    if (!post) {
+      return res.status(404).json({ msg: "Post not found" });
+    }
+
+    // Find the comment to be deleted
+    const comment = post.comments.find((c) => c._id.toString() === commentId);
+
+    if (!comment) {
+      return res.status(404).json({ msg: "Comment not found" });
+    }
+
+    // Check if the user making the request is the author of the comment
+    if (comment.commenter._id.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ msg: "Unauthorized to delete this comment" });
+    }
+
+    // Remove the comment from the post's comments array
+    post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
+
+    // Save the updated post without the deleted comment
+    const newPost = await post.save();
+
+    // const newPost = await pst.populate({
+    //   path : "comments.commenter",
+    //   select : " name avatar username"
+    // }).populate({
+    //   path: "author",
+    //   select: "-password -info -contact"
+    // });
+
+    return res
+      .status(200)
+      .json({ msg: "Comment deleted successfully", newPost });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: "Internal server error" });
@@ -247,7 +344,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }).single("avatar");
 
 const updateAvatarController = (req, res) => {
-
   upload(req, res, async (err) => {
     if (err) {
       console.error("Error uploading avatar:", err);
@@ -287,12 +383,10 @@ const updateAvatarController = (req, res) => {
           }
         );
 
-        return res
-          .status(200)
-          .json({
-            message: "Avatar updated successfully",
-            avatarURL: user.avatar,
-          });
+        return res.status(200).json({
+          message: "Avatar updated successfully",
+          avatarURL: user.avatar,
+        });
       } else {
         return res.status(400).json({ error: "No avatar file provided" });
       }
@@ -303,22 +397,6 @@ const updateAvatarController = (req, res) => {
   });
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const getBloodDonationPostController = async (req, res) => {
   try {
     if (req.query.page && req.query.limit) {
@@ -327,7 +405,9 @@ const getBloodDonationPostController = async (req, res) => {
 
       let skip = (page - 1) * limit;
 
-      let notices = await Post.find({ "postType" : "BLOOD_DONATION_POST" })
+      let notices = await Post.find({ postType: "BLOOD_DONATION_POST" })
+        .populate("author")
+        .select("-password -info -contact")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
@@ -336,14 +416,16 @@ const getBloodDonationPostController = async (req, res) => {
 
       return;
     }
-    let notices = await Post.find({ "postType" : "BLOOD_DONATION_POST" }).sort({ createdAt: -1 });
+    let notices = await Post.find({ postType: "BLOOD_DONATION_POST" })
+      .populate("author")
+      .select("-password -info -contact")
+      .sort({ createdAt: -1 });
+
     res.status(200).json({ notices });
   } catch (error) {
     res.status(400).json({ message: "could not find notices.", error });
   }
 };
-
-
 
 const getNoticeController = async (req, res) => {
   try {
@@ -353,7 +435,9 @@ const getNoticeController = async (req, res) => {
 
       let skip = (page - 1) * limit;
 
-      let notices = await Post.find({ "postType" : "NOTICE_POST" })
+      let notices = await Post.find({ postType: "NOTICE_POST" })
+        .populate("author")
+        .select("-password -info -contact")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
@@ -362,22 +446,18 @@ const getNoticeController = async (req, res) => {
 
       return;
     }
-    let notices = await Post.find({ "postType" : "NOTICE_POST" }).sort({ createdAt: -1 });
+    let notices = await Post.find({ postType: "NOTICE_POST" })
+      .populate("author")
+      .select("-password -info -contact")
+      .sort({ createdAt: -1 });
+
     res.status(200).json({ notices });
   } catch (error) {
     res.status(400).json({ message: "could not find notices.", error });
   }
 };
 
-
-
-
-
-
-
-
 const getOneUsersPostController = async (req, res) => {
-
   const userId = req.params.id;
 
   try {
@@ -387,7 +467,9 @@ const getOneUsersPostController = async (req, res) => {
 
       let skip = (page - 1) * limit;
 
-      let paginatedPosts = await Post.find({ "author.id" : userId })
+      let paginatedPosts = await Post.find({ author: userId })
+        .populate("author")
+        .select("-password -info -contact")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
@@ -396,15 +478,16 @@ const getOneUsersPostController = async (req, res) => {
 
       return;
     }
-    let posts = await Post.find({ "author.id" : userId }).sort({ createdAt: -1 });
-    res.status(200).json({ posts });
+    let posts = await Post.find({ author: userId })
+      .populate("author")
+      .select("-password -info -contact")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ paginatedPosts: posts });
   } catch (error) {
     res.status(400).json({ message: "could not find posts.", error });
   }
 };
-
-
-
 
 // const getProductController = async (req,res)=>{};
 
@@ -419,7 +502,8 @@ module.exports = {
   handleLikeController,
   handleCommentController,
   updateAvatarController,
-  getNoticeController , 
+  getNoticeController,
   getBloodDonationPostController,
-  getOneUsersPostController
+  getOneUsersPostController,
+  handleDeleteCommentController,
 };

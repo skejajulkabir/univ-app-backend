@@ -1,7 +1,7 @@
 const express = require('express');
 
 // importing controllers
-const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController , updateAvatarController , getNoticeController , getBloodDonationPostController, getOneUsersPostController} = require('./ClientControlers1')
+const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController , updateAvatarController , getNoticeController , getBloodDonationPostController, getOneUsersPostController, handleDeleteCommentController} = require('./ClientControlers1')
 
 const {addUserController , getUserController , loginUserCpntroller , getUserByIdController , updateUserController , updatePasswordController } = require('./UserControllers')
 
@@ -35,6 +35,7 @@ ClientRouter1.get('/getbloodnotice', getBloodDonationPostController);
 ClientRouter1.get('/getrightsidebaruserlist', getRightSidebarUserListController);
 ClientRouter1.post('/like', handleLikeController);
 ClientRouter1.post('/comment', handleCommentController);
+ClientRouter1.delete('/deletecomment', handleDeleteCommentController);
 ClientRouter1.post('/updateavatar/:uID', updateAvatarController);
 
 
