@@ -18,6 +18,11 @@ const generateOTP = () => {
 const sendOTPhandler = async (req, res) => {
   const { userEmail, regularEmail, users_id } = req.body;
 
+  if (!userEmail.includes("@student.just.edu.bd")) {
+    res.status(403).json({ message: "Invalid E-mail address..." });
+    return;
+  }
+
   let config = {
     service: "gmail",
     auth: {
@@ -97,8 +102,8 @@ const verifyOTPhandler = async (req, res) => {
     }
 
     // Check if the OTP provided by the user matches the stored OTP
-    if (otpVerification.otp !== parseInt(otp)) {
-      await OtpVerification.deleteOne({ user: userID });
+    if (parseInt(otpVerification.otp) !== parseInt(otp)) {
+      await OtpVerification.deleteMany({ user: userID });
       return res.status(400).json({ error: "Invalid OTP." });
     }
 
@@ -106,7 +111,7 @@ const verifyOTPhandler = async (req, res) => {
     const currentTime = new Date();
     if (currentTime > otpVerification.expiry) {
       // OTP has expired
-      await OtpVerification.deleteOne({ user: userID });
+      await OtpVerification.deleteMany({ user: userID });
       return res
         .status(400)
         .json({ error: "OTP has expired. Please request a new OTP." });
@@ -123,7 +128,7 @@ const verifyOTPhandler = async (req, res) => {
     }
 
     // Delete the OTP verification entry from the database as it is no longer needed
-    await OtpVerification.deleteOne({ user: userID });
+    await OtpVerification.deleteMany({ user: userID });
 
     return res.status(200).json({ msg: "Email verified successfully." });
   } catch (error) {
@@ -147,7 +152,10 @@ const forgotPasswordController = async (req, res) => {
 
     const newPasswordString = newPassword.toString();
 
-    const encryptedNewPassword = CryptoJS.AES.encrypt(newPasswordString,"secret key 123").toString();
+    const encryptedNewPassword = CryptoJS.AES.encrypt(
+      newPasswordString,
+      "secret key 123"
+    ).toString();
 
     console.log(newPasswordString);
 
@@ -192,12 +200,10 @@ const forgotPasswordController = async (req, res) => {
 
     await transporter.sendMail(message);
 
-    return res
-      .status(200)
-      .json({
-        message:
-          "Password reset successful. Check your email for the new password.",
-      });
+    return res.status(200).json({
+      message:
+        "Password reset successful. Check your email for the new password.",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Could not reset password", error });

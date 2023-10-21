@@ -10,6 +10,7 @@ const AdminRouter1 = require('./Routers/AdminRouters/AdminRouter1')
 const verifyRouter1 = require('./Routers/verification/varificationRouter')
 const MailRouter = require('./Routers/MailRoutes/MailRouter')
 const searchRouter = require('./Routers/search router/searchRouter')
+const PaymentRouter = require('./Routers/PaymentRouters/PaymentRouter')
 
 const port = process.env.PORT || 1432;
 
@@ -31,6 +32,7 @@ app.use("/admin", AdminRouter1)
 app.use("/verify", verifyRouter1)
 app.use("/mail", MailRouter)
 app.use("/search", searchRouter)
+app.use("/payment", PaymentRouter)
 
 
 

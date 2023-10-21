@@ -268,8 +268,10 @@ const updateOrderController = async (req, res) => {
 
     const token = req.headers.authorization.split(' ')[1];
     const tokenResponse = jwt.verify(token, 'openSecretKey');
+
+    console.log(tokenResponse)
     
-    if(!tokenResponse.roles.includes("admin")){
+    if(!tokenResponse.roles.includes("ADMIN")){
       res.status(403).json({ message : "You don't have permission to add roles."});
       return
     }

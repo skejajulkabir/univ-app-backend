@@ -5,6 +5,8 @@ const User = require("../../models/userModel");
 const AvailableTshirtSize = require("../../models/availableTshirtSize");
 const Order = require("../../models/OrderModel");
 
+const jwt = require('jsonwebtoken');
+
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -261,59 +263,126 @@ const handleCommentController = async (req, res) => {
 const handleDeleteCommentController = async (req, res) => {
   const { postId, commentId, userId } = req.body;
 
-  console.log(req.body);
-
-  try {
-    // Check if the post with the given postId exists
-    const post = await Post.findById(postId)
-      .populate({
-        path: "comments.commenter",
-        select: " name avatar username",
-      })
-      .populate({
-        path: "author",
-        select: "-password -info -contact",
-      });
-
-    if (!post) {
-      return res.status(404).json({ msg: "Post not found" });
-    }
-
-    // Find the comment to be deleted
-    const comment = post.comments.find((c) => c._id.toString() === commentId);
-
-    if (!comment) {
-      return res.status(404).json({ msg: "Comment not found" });
-    }
-
-    // Check if the user making the request is the author of the comment
-    if (comment.commenter._id.toString() !== userId) {
+  
+  
+  const token = req.headers.authorization.split(' ')[1];
+  const tokenResponse = jwt.verify(token, 'openSecretKey');
+  const { roles } = tokenResponse;
+  console.log(tokenResponse)
+  
+  if (roles.includes("MODERATOR")) {
+    try {
+      //? Check if the post with the given postId exists
+      const post = await Post.findById(postId)
+        .populate({
+          path: "comments.commenter",
+          select: " name avatar username",
+        })
+        .populate({
+          path: "author",
+          select: "-password -info -contact",
+        });
+  
+      if (!post) {
+        return res.status(404).json({ msg: "Post not found" });
+      }
+  
+      // Find the comment to be deleted
+      const comment = post.comments.find((c) => c._id.toString() === commentId);
+  
+      if (!comment) {
+        return res.status(404).json({ msg: "Comment not found" });
+      }
+  
+      // Check if the user making the request is the author of the comment
+      // if (comment.commenter._id.toString() !== userId) {
+      //   return res
+      //     .status(403)
+      //     .json({ msg: "Unauthorized to delete this comment" });
+      // }
+  
+      // Remove the comment from the post's comments array
+      post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
+  
+      // Save the updated post without the deleted comment
+      const newPost = await post.save();
+  
+      // const newPost = await pst.populate({
+      //   path : "comments.commenter",
+      //   select : " name avatar username"
+      // }).populate({
+      //   path: "author",
+      //   select: "-password -info -contact"
+      // });
+  
       return res
-        .status(403)
-        .json({ msg: "Unauthorized to delete this comment" });
+        .status(200)
+        .json({ msg: "Comment deleted successfully", newPost });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: "Internal server error" });
     }
 
-    // Remove the comment from the post's comments array
-    post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
 
-    // Save the updated post without the deleted comment
-    const newPost = await post.save();
-
-    // const newPost = await pst.populate({
-    //   path : "comments.commenter",
-    //   select : " name avatar username"
-    // }).populate({
-    //   path: "author",
-    //   select: "-password -info -contact"
-    // });
-
-    return res
-      .status(200)
-      .json({ msg: "Comment deleted successfully", newPost });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ msg: "Internal server error" });
+    
   }
+  //!if its from the user...
+  else {
+    try {
+      //? Check if the post with the given postId exists
+      const post = await Post.findById(postId)
+        .populate({
+          path: "comments.commenter",
+          select: " name avatar username",
+        })
+        .populate({
+          path: "author",
+          select: "-password -info -contact",
+        });
+  
+      if (!post) {
+        return res.status(404).json({ msg: "Post not found" });
+      }
+  
+      // Find the comment to be deleted
+      const comment = post.comments.find((c) => c._id.toString() === commentId);
+  
+      if (!comment) {
+        return res.status(404).json({ msg: "Comment not found" });
+      }
+  
+      // Check if the user making the request is the author of the comment
+      if (comment.commenter._id.toString() !== userId) {
+        return res
+          .status(403)
+          .json({ msg: "Unauthorized to delete this comment" });
+      }
+  
+      // Remove the comment from the post's comments array
+      post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
+  
+      // Save the updated post without the deleted comment
+      const newPost = await post.save();
+  
+      // const newPost = await pst.populate({
+      //   path : "comments.commenter",
+      //   select : " name avatar username"
+      // }).populate({
+      //   path: "author",
+      //   select: "-password -info -contact"
+      // });
+  
+      return res
+        .status(200)
+        .json({ msg: "Comment deleted successfully", newPost });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ msg: "Internal server error" });
+    }
+  }
+
+
+  
 };
 
 //?update avatar
@@ -376,12 +445,12 @@ const updateAvatarController = (req, res) => {
         user.avatar = `${process.env.backendURL}/static/uploads/avatars/${req.file.filename}`;
         await user.save();
 
-        await Post.updateMany(
-          { "author.userName": user.userName },
-          {
-            "author.image": `${process.env.backendURL}/static/uploads/avatars/${req.file.filename}`,
-          }
-        );
+        // await Post.updateMany(
+        //   { "author": user._id },
+        //   {
+        //     "author": user._id,  
+        //   }
+        // );
 
         return res.status(200).json({
           message: "Avatar updated successfully",
@@ -406,18 +475,37 @@ const getBloodDonationPostController = async (req, res) => {
       let skip = (page - 1) * limit;
 
       let notices = await Post.find({ postType: "BLOOD_DONATION_POST" })
-        .populate("author")
+        .populate({
+          path: "author",
+          select: "-password -info -contact", // Include only the fields you need
+        })
+        .populate({
+          path: "comments.commenter",
+          select: "name avatar userName", // Include only the fields you need
+        })
         .select("-password -info -contact")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
-      res.status(200).json({ notices });
+        // Check if there are more posts available
+        const totalPostsCount = await Post.countDocuments();
+        const remainingPosts = totalPostsCount - (skip + limit);
+        const hasMore = remainingPosts > 0;
+
+      res.status(200).json({ notices , hasMore });
 
       return;
     }
     let notices = await Post.find({ postType: "BLOOD_DONATION_POST" })
-      .populate("author")
+      .populate({
+        path: "author",
+        select: "-password -info -contact", // Include only the fields you need
+      })
+      .populate({
+        path: "comments.commenter",
+        select: "name avatar userName", // Include only the fields you need
+      })
       .select("-password -info -contact")
       .sort({ createdAt: -1 });
 
@@ -436,13 +524,25 @@ const getNoticeController = async (req, res) => {
       let skip = (page - 1) * limit;
 
       let notices = await Post.find({ postType: "NOTICE_POST" })
-        .populate("author")
+        .populate({
+          path: "author",
+          select: "-password -info -contact", // Include only the fields you need
+        })
+        .populate({
+          path: "comments.commenter",
+          select: "name avatar userName", // Include only the fields you need
+        })
         .select("-password -info -contact")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
-      res.status(200).json({ notices });
+      // Check if there are more posts available
+      const totalPostsCount = await Post.countDocuments();
+      const remainingPosts = totalPostsCount - (skip + limit);
+      const hasMore = remainingPosts > 0;
+
+      res.status(200).json({ notices , hasMore });
 
       return;
     }
