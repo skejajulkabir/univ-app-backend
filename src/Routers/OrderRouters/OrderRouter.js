@@ -2,7 +2,7 @@ const express = require('express');
 
 
 //? importing controllers================================================
-const { addOrderController } = require('./OrderController')
+const { addOrderController, validatePaymentController } = require('./OrderController')
 
 
 
