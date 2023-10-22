@@ -143,25 +143,25 @@ const getAvailableTshirtSizeController = async (req, res) => {
   res.status(200).json({ sizes });
 };
 
-const addOrderController = async (req, res) => {
-  try {
-    const o = req.body;
+// const addOrderController = async (req, res) => {
+//   try {
+//     const o = req.body;
 
-    const { customer, cart, totalOrderValue, status } = o;
+//     const { customer, cart, totalOrderValue, status } = o;
 
-    const ordr = new Order({ customer, cart, totalOrderValue, status });
+//     const ordr = new Order({ customer, cart, totalOrderValue, status });
 
-    const r = await ordr.save();
+//     const r = await ordr.save();
 
-    res.status(200).json({
-      message: "post have been added successfully to the DB.",
-      response: r,
-    });
-  } catch (error) {
-    console.error("Error saving data:", error);
-    res.status(500).json({ message: "Could not add order to the DB.", error });
-  }
-};
+//     res.status(200).json({
+//       message: "post have been added successfully to the DB.",
+//       response: r,
+//     });
+//   } catch (error) {
+//     console.error("Error saving data:", error);
+//     res.status(500).json({ message: "Could not add order to the DB.", error });
+//   }
+// };
 
 const handleLikeController = async (req, res) => {
   const { postId, name, userName } = req.body;
@@ -598,7 +598,6 @@ module.exports = {
   getPostController,
   getRightSidebarUserListController,
   getAvailableTshirtSizeController,
-  addOrderController,
   handleLikeController,
   handleCommentController,
   updateAvatarController,

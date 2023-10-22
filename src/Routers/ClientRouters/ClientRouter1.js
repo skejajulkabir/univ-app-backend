@@ -1,7 +1,7 @@
 const express = require('express');
 
 // importing controllers
-const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController , addOrderController , handleLikeController , handleCommentController , updateAvatarController , getNoticeController , getBloodDonationPostController, getOneUsersPostController, handleDeleteCommentController} = require('./ClientControlers1')
+const {getProductController , findproductbyidController , createPostController , getPostController , getRightSidebarUserListController , getAvailableTshirtSizeController ,  handleLikeController , handleCommentController , updateAvatarController , getNoticeController , getBloodDonationPostController, getOneUsersPostController, handleDeleteCommentController} = require('./ClientControlers1')
 
 const {addUserController , getUserController , loginUserCpntroller , getUserByIdController , updateUserController , updatePasswordController } = require('./UserControllers')
 
@@ -15,7 +15,7 @@ const ClientRouter1 = express.Router();
 ClientRouter1.get('/getproducts', getProductController);
 ClientRouter1.get('/getavailablesizes', getAvailableTshirtSizeController);
 ClientRouter1.get('/product/:id', findproductbyidController);
-ClientRouter1.post('/addorder', addOrderController);
+// ClientRouter1.post('/addorder', addOrderController);
 
 
 

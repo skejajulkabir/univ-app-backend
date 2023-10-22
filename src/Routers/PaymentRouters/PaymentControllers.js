@@ -12,16 +12,14 @@ const is_live = false //true for live, false for sandbox
 
 //sslcommerz init
 const sslInit =  (req, res) => {
-
-    console.log("payment")
     const data = {
         total_amount: 100,
         currency: 'BDT',
-        tran_id: 'REF123', // use unique tran_id for each api call
-        success_url: 'http://localhost:5000/success',
-        fail_url: 'http://localhost:5000/fail',
-        cancel_url: 'http://localhost:5000/cancel',
-        ipn_url: 'http://localhost:5000/ipn',
+        tran_id: 'REF123',
+        success_url: `${process.env.frontendURL}/success`,
+        fail_url: `${process.env.frontendURL}/fail`,
+        cancel_url: `${process.env.frontendURL}/cancel`,
+        ipn_url: `${process.env.frontendURL}/ipn`,
         shipping_method: 'Courier',
         product_name: 'Computer.',
         product_category: 'Electronic',
@@ -44,15 +42,16 @@ const sslInit =  (req, res) => {
         ship_postcode: 1000,
         ship_country: 'Bangladesh',
     };
+  
     const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live)
-    sslcz.init(data).then(apiResponse => {
-
+    sslcz.init(data).then((apiResponse) => {
         console.log(apiResponse)
-        // Redirect the user to payment gateway
-        let GatewayPageURL = apiResponse.GatewayPageURL
-        res.redirect(GatewayPageURL)
-        console.log('Redirecting to: ', GatewayPageURL)
+      // Redirect the user to the payment gateway
+      let GatewayPageURL = apiResponse.GatewayPageURL;
+      res.json({GatewayPageURL});
     });
-};
+  };
+
+
 
 module.exports = { sslInit };

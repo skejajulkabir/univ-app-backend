@@ -25,7 +25,8 @@ const orderSchema = new mongoose.Schema({
     }
   ],
   status: { type: String, required: true, default: "NEW_ORDER" },
-  totalOrderValue: { type: Number },
+  isPaid: { type: Boolean, required: true, default: false },
+  totalOrderValue: { type: Number , required: true, default: 0 },
   createdAt: {
     type: Date,
     default: Date.now,
