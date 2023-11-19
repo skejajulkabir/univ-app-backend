@@ -6,8 +6,8 @@ const Order = require("../../models/OrderModel");
 // const User = require("../../models/userModel");
 
 //? declaring variables
-const store_id = "abc6533752d771c4";
-const store_passwd = "abc6533752d771c4@ssl";
+const store_id = process.env.STORE_ID;
+const store_passwd = process.env.STORE_PASSWORD;
 const is_live = false; //true for live, false for sandbox
 
 //sslcommerz init
@@ -92,7 +92,6 @@ const paymentfailedController = async (req, res) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);
 
-    console.log(order)
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
@@ -109,7 +108,6 @@ const paymentCancelledController = async (req, res) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);
 
-    console.log(order)
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
@@ -122,8 +120,60 @@ const paymentCancelledController = async (req, res) => {
   }
 };
 
+
+
+//? <================== donation segment =================>
+//? <================== donation segment =================>
+//? <================== donation segment =================>
+
+
+const initiate_SSL_DONATION = (req, res) => {
+  const requestData = req.body;
+
+  const data = {
+    total_amount: requestData.total_amount,
+    currency: requestData.currency,
+    tran_id: requestData.tran_id,
+    success_url: `${process.env.backendURL}/donation/success/${requestData.tran_id}`, //? Not coming from frontend...
+    fail_url: `${process.env.backendURL}/donation/failed/${requestData.tran_id}`, //? Not coming from frontend...
+    cancel_url: `${process.env.backendURL}/donation/cancelled/${requestData.tran_id}`, //? Not coming from frontend...
+    ipn_url: `${process.env.backendURL}/donation/ipn/${requestData.tran_id}`, //? Not coming from frontend...(IPN = Instant Payment Notification...)
+    shipping_method: "Courier", //? //? Not coming from frontend...
+    product_name: "ITS A DONATION...",
+    product_category: "ITS A DONATION...",
+    product_profile: "ITS A DONATION...",
+    cus_name: "ITS A DONATION...",
+    cus_email: "ITS A DONATION...",
+    cus_add1: "ITS A DONATION...",
+    cus_add2: "ITS A DONATION...",
+    cus_city: "ITS A DONATION...",
+    cus_state: "ITS A DONATION...",
+    cus_postcode: "ITS A DONATION...",
+    cus_country: "ITS A DONATION...",
+    cus_phone: "ITS A DONATION...",
+    cus_fax: "ITS A DONATION...",
+    ship_name: "ITS A DONATION...",
+    ship_add1: "ITS A DONATION...",
+    ship_add2: "ITS A DONATION...",
+    ship_city: "ITS A DONATION...",
+    ship_state: "ITS A DONATION...",
+    ship_postcode: "ITS A DONATION...",
+    ship_country: "ITS A DONATION...",
+  };
+
+  const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
+  sslcz.init(data).then((apiResponse) => {
+    // let GatewayPageURL = apiResponse.GatewayPageURL;
+    res.json({ apiResponse });
+  });
+};
+
+
+
+
 module.exports = {
   initiate_SSL_Payment,
+  initiate_SSL_DONATION,
   validatePaymentController,
   paymentSuccessController,
   paymentfailedController,

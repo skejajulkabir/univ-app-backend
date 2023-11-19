@@ -38,7 +38,6 @@ const searchUsersHandler = async (req, res) => {
       updatedAt: 0,
     };
 
-    // console.log("Search Criteria:", searchCriteria);
 
     const users = await User.find(searchCriteria, projection).select('-password').limit(10);
 
@@ -59,7 +58,6 @@ const searchUsersHandler = async (req, res) => {
       return { ...user._doc, matchedParts };
     });
 
-    // console.log("Processed Users:", processedUsers);
 
     return res.status(200).json({ searchQuery: req.body, users: processedUsers });
   } catch (error) {
@@ -77,7 +75,6 @@ module.exports = { searchUsersHandler };
 
 // const searchUsersHandler = async (req, res) => {
 //   const { name, userName, bloodGroup, department, roll, admissionSession, from, currentLocation } = req.body;
-//   console.log(req.body);
 
 //   // Construct the search criteria dynamically
 //   const searchCriteria = {};

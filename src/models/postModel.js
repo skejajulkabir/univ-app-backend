@@ -6,7 +6,7 @@ const postSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  caption : { type: String, required: true},
+  caption : { type: String },
   typeOfThePost: { type: String, required: true },
   imgURL: { type: String },
   videoURL: { type: String },
