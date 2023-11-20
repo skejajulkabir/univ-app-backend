@@ -5,7 +5,7 @@ const User = require("../../models/userModel");
 const AvailableTshirtSize = require("../../models/availableTshirtSize");
 const Order = require("../../models/OrderModel");
 
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const multer = require("multer");
 const path = require("path");
@@ -29,7 +29,7 @@ const getProductController = async (req, res) => {
       const remainingProducts = totalProductsCount - (skip + limit);
       const hasMore = remainingProducts > 0;
 
-      res.status(200).json({ paginatedProducts , hasMore });
+      res.status(200).json({ paginatedProducts, hasMore });
 
       return;
     }
@@ -117,7 +117,7 @@ const getPostController = async (req, res) => {
       const remainingPosts = totalPostsCount - (skip + limit);
       const hasMore = remainingPosts > 0;
 
-      res.status(200).json({ paginatedPosts ,  hasMore});
+      res.status(200).json({ paginatedPosts, hasMore });
 
       return;
     }
@@ -128,12 +128,25 @@ const getPostController = async (req, res) => {
   }
 };
 
+// const getRightSidebarUserListController = async (req, res) => {
+//   try {
+//     let users = await User.find().select("name userName avatar").limit(10);
+//     res.status(200).json({ users });
+//   } catch (error) {
+//     res.status(400).json({ message: "could not find posts.", error });
+//   }
+// };
+
 const getRightSidebarUserListController = async (req, res) => {
   try {
-    let users = await User.find().select("name userName avatar").limit(10);
+    let users = await User.aggregate([
+      { $sample: { size: 10 } },
+      { $project: { _id: 0, name: 1, userName: 1, avatar: 1 } },
+    ]);
+
     res.status(200).json({ users });
   } catch (error) {
-    res.status(400).json({ message: "could not find posts.", error });
+    res.status(400).json({ message: "Could not find users.", error });
   }
 };
 
@@ -263,13 +276,11 @@ const handleCommentController = async (req, res) => {
 const handleDeleteCommentController = async (req, res) => {
   const { postId, commentId, userId } = req.body;
 
-  
-  
-  const token = req.headers.authorization.split(' ')[1];
-  const tokenResponse = jwt.verify(token, 'openSecretKey');
+  const token = req.headers.authorization.split(" ")[1];
+  const tokenResponse = jwt.verify(token, "openSecretKey");
   const { roles } = tokenResponse;
-  console.log(tokenResponse)
-  
+  console.log(tokenResponse);
+
   if (roles.includes("MODERATOR")) {
     try {
       //? Check if the post with the given postId exists
@@ -282,31 +293,33 @@ const handleDeleteCommentController = async (req, res) => {
           path: "author",
           select: "-password -info -contact",
         });
-  
+
       if (!post) {
         return res.status(404).json({ msg: "Post not found" });
       }
-  
+
       // Find the comment to be deleted
       const comment = post.comments.find((c) => c._id.toString() === commentId);
-  
+
       if (!comment) {
         return res.status(404).json({ msg: "Comment not found" });
       }
-  
+
       // Check if the user making the request is the author of the comment
       // if (comment.commenter._id.toString() !== userId) {
       //   return res
       //     .status(403)
       //     .json({ msg: "Unauthorized to delete this comment" });
       // }
-  
+
       // Remove the comment from the post's comments array
-      post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
-  
+      post.comments = post.comments.filter(
+        (c) => c._id.toString() !== commentId
+      );
+
       // Save the updated post without the deleted comment
       const newPost = await post.save();
-  
+
       // const newPost = await pst.populate({
       //   path : "comments.commenter",
       //   select : " name avatar username"
@@ -314,7 +327,7 @@ const handleDeleteCommentController = async (req, res) => {
       //   path: "author",
       //   select: "-password -info -contact"
       // });
-  
+
       return res
         .status(200)
         .json({ msg: "Comment deleted successfully", newPost });
@@ -322,9 +335,6 @@ const handleDeleteCommentController = async (req, res) => {
       console.error(error);
       return res.status(500).json({ msg: "Internal server error" });
     }
-
-
-    
   }
   //!if its from the user...
   else {
@@ -339,31 +349,33 @@ const handleDeleteCommentController = async (req, res) => {
           path: "author",
           select: "-password -info -contact",
         });
-  
+
       if (!post) {
         return res.status(404).json({ msg: "Post not found" });
       }
-  
+
       // Find the comment to be deleted
       const comment = post.comments.find((c) => c._id.toString() === commentId);
-  
+
       if (!comment) {
         return res.status(404).json({ msg: "Comment not found" });
       }
-  
+
       // Check if the user making the request is the author of the comment
       if (comment.commenter._id.toString() !== userId) {
         return res
           .status(403)
           .json({ msg: "Unauthorized to delete this comment" });
       }
-  
+
       // Remove the comment from the post's comments array
-      post.comments = post.comments.filter((c) => c._id.toString() !== commentId);
-  
+      post.comments = post.comments.filter(
+        (c) => c._id.toString() !== commentId
+      );
+
       // Save the updated post without the deleted comment
       const newPost = await post.save();
-  
+
       // const newPost = await pst.populate({
       //   path : "comments.commenter",
       //   select : " name avatar username"
@@ -371,7 +383,7 @@ const handleDeleteCommentController = async (req, res) => {
       //   path: "author",
       //   select: "-password -info -contact"
       // });
-  
+
       return res
         .status(200)
         .json({ msg: "Comment deleted successfully", newPost });
@@ -380,9 +392,6 @@ const handleDeleteCommentController = async (req, res) => {
       return res.status(500).json({ msg: "Internal server error" });
     }
   }
-
-
-  
 };
 
 //?update avatar
@@ -410,7 +419,12 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage }).single("avatar");
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024, // 1 megabyte (in bytes)
+  },
+}).single("avatar");
 
 const updateAvatarController = (req, res) => {
   upload(req, res, async (err) => {
@@ -448,7 +462,7 @@ const updateAvatarController = (req, res) => {
         // await Post.updateMany(
         //   { "author": user._id },
         //   {
-        //     "author": user._id,  
+        //     "author": user._id,
         //   }
         // );
 
@@ -461,7 +475,7 @@ const updateAvatarController = (req, res) => {
       }
     } catch (error) {
       console.error("Error updating avatar:", error);
-      return res.status(500).json({ error: "Internal server error" });
+      return res.status(500).json({ error: "Internal server error" , message: error.message });
     }
   });
 };
@@ -488,12 +502,12 @@ const getBloodDonationPostController = async (req, res) => {
         .skip(skip)
         .limit(limit);
 
-        // Check if there are more posts available
-        const totalPostsCount = await Post.countDocuments();
-        const remainingPosts = totalPostsCount - (skip + limit);
-        const hasMore = remainingPosts > 0;
+      // Check if there are more posts available
+      const totalPostsCount = await Post.countDocuments();
+      const remainingPosts = totalPostsCount - (skip + limit);
+      const hasMore = remainingPosts > 0;
 
-      res.status(200).json({ notices , hasMore });
+      res.status(200).json({ notices, hasMore });
 
       return;
     }
@@ -542,7 +556,7 @@ const getNoticeController = async (req, res) => {
       const remainingPosts = totalPostsCount - (skip + limit);
       const hasMore = remainingPosts > 0;
 
-      res.status(200).json({ notices , hasMore });
+      res.status(200).json({ notices, hasMore });
 
       return;
     }

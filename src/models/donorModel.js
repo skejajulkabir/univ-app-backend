@@ -9,12 +9,13 @@ const mongoose = require("mongoose");
 const donorSchema = new mongoose.Schema({
     Donors: [
         {
-            name: { type: String, required:true},
-            userName: { type: String, required:true},
-            amount: { type: Number, required:true},
-            isAmountPublic: { type: Boolean, required:true},
-            desc: { type: String , required:true},
-            info: {type: String, required:true},
+            name: { type: String },
+            img: { type: String },
+            userName: { type: String },
+            amount: { type: Number },
+            isAmountPublic: { type: Boolean },
+            desc: { type: String  },
+            info: {type: String },
         }
     ]
 }, { timestamps: true });

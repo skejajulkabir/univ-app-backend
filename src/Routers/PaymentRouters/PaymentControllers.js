@@ -3,6 +3,7 @@ const SSLCommerzPayment = require("sslcommerz-lts");
 
 //importing models
 const Order = require("../../models/OrderModel");
+const availableTshirtSize = require("../../models/availableTshirtSize");
 // const User = require("../../models/userModel");
 
 //? declaring variables
@@ -13,6 +14,7 @@ const is_live = false; //true for live, false for sandbox
 //sslcommerz init
 const initiate_SSL_Payment = (req, res) => {
   const requestData = req.body;
+  console.log(requestData)
 
   const data = {
     total_amount: requestData.total_amount,
@@ -64,22 +66,47 @@ const validatePaymentController = (req, res) => {
   });
 };
 
+
+
 const paymentSuccessController = async (req, res) => {
   try {
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       { isPaid: true },
-      { new: true } // This option returns the updated document
+      { new: true }
     );
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
 
-    // return res.status(200).json({
-    //   message: "Order has been marked as paid",
-    //   order: order,
-    // });
+    // Collect all unique color and size combinations from the order
+    const uniqueTshirtSizes = [...new Set(order.cart.map(item => ({ color: item.color, size: item.size })))];
+
+    try {
+      for (const tshirtSizeInfo of uniqueTshirtSizes) {
+        const tshirtSize = await availableTshirtSize.findOne(
+          { name: tshirtSizeInfo.color }
+        );
+
+        const index = tshirtSize.data.findIndex(
+          (item) => item.size === tshirtSizeInfo.size
+        );
+
+        if (index !== -1) {
+          const orderItems = order.cart.filter(item => item.color === tshirtSizeInfo.color && item.size === tshirtSizeInfo.size);
+          const totalOrderedQuantity = orderItems.reduce((total, item) => total + item.qty, 0);
+          const updatedQuantity = parseInt(tshirtSize.data[index].quantity, 10) - totalOrderedQuantity;
+
+          await availableTshirtSize.updateOne(
+            { _id: tshirtSize._id, 'data.size': tshirtSizeInfo.size },
+            { $set: { 'data.$.quantity': updatedQuantity } }
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error updating available T-shirt sizes:", error);
+    }
 
     return res.redirect(`${process.env.frontendURL}/payment/success`);
   } catch (error) {
@@ -87,6 +114,12 @@ const paymentSuccessController = async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+
+
+
+
 
 const paymentfailedController = async (req, res) => {
   try {
