@@ -5,8 +5,6 @@ const fs = require("fs");
 
 // importing models
 const Donor = require("../../models/donorModel");
-// const Order = require("../../models/OrderModel");
-const User = require("../../models/userModel");
 
 //?update avatar
 
@@ -36,70 +34,51 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 megabyte (in bytes)
+    fileSize: 3 * 1024 * 1024, // 5 megabyte (in bytes)
   },
 }).single("avatar");
 
-const addDonationController = (req, res) => {
-
-  console.log(req.body)
-
-  const requestBody = req.body;
-
+const addDonationController = async (req, res) => {
+  try {
+    // Uploading image of the donor
+    upload(req, res, async (err) => {
 
 
+      const data = req.body;
 
-
-
+      const { donorName, donorIdentity, donorPhoneNumber, donorAddress, donorDescriptions, DonationAmount } = data;
 
 
 
-  //!  Uploading image of the donor SEGMENT
-  //!  Uploading image of the donor SEGMENT
-  //!  Uploading image of the donor SEGMENT
+      const newDonor = new Donor({
+        name : donorName,
+        identity : donorIdentity,
+        phone : donorPhoneNumber,
+        address : donorAddress,
+        desc : donorDescriptions,
+        amount : DonationAmount,
+      });
 
-  upload(req, res, async (err) => {
-    if (err) {
-      console.error("Error uploading avatar:", err);
-      return res.status(500).json({ error: "Failed to upload avatar", err });
-    }
 
-    try {
-      const userId = req.params.uID;
-      const user = await User.findById(userId);
-
-      if (!user) {
-        return res.status(404).json({ error: "User not found" });
+      if (err) {
+        console.error("Error uploading avatar:", err);
+        return res.status(500).json({ error: "Failed to upload avatar", err });
       }
 
       if (req.file) {
-        if (user.avatar) {
-          try {
-            const avtrName = user.avatar.split("/")[6];
-            fs.unlinkSync(`${avatarDir}/${avtrName}`);
-          } catch (error) {
-            console.log(error);
-          }
-        }
-
-        // Update the avatar field in the user document
-        user.avatar = `${process.env.backendURL}/static/uploads/donorPhotos/${req.file.filename}`;
-        await user.save();
-
-        return res.status(200).json({
-          message: "Avatar updated successfully",
-          avatarURL: user.avatar,
-        });
-      } else {
-        return res.status(400).json({ error: "No avatar file provided" });
+        // Save avatar URL in the donor document
+        newDonor.img = `${process.env.backendURL}/static/uploads/donorPhotos/${req.file.filename}`;
       }
-    } catch (error) {
-      console.error("Error updating avatar:", error);
-      return res
-        .status(500)
-        .json({ error: "Internal server error", message: error.message });
-    }
-  });
+
+      // Save donor data in the database
+      await newDonor.save();
+
+      res.status(200).json({ message: "Donation added successfully" });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 module.exports = {

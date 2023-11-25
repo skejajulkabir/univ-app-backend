@@ -4,6 +4,7 @@ const Product = require("../../models/product");
 const User = require("../../models/userModel");
 const AvailableTshirtSize = require("../../models/availableTshirtSize");
 const Order = require("../../models/OrderModel");
+const Donor = require("../../models/donorModel")
 
 const jwt = require("jsonwebtoken");
 
@@ -376,14 +377,6 @@ const handleDeleteCommentController = async (req, res) => {
       // Save the updated post without the deleted comment
       const newPost = await post.save();
 
-      // const newPost = await pst.populate({
-      //   path : "comments.commenter",
-      //   select : " name avatar username"
-      // }).populate({
-      //   path: "author",
-      //   select: "-password -info -contact"
-      // });
-
       return res
         .status(200)
         .json({ msg: "Comment deleted successfully", newPost });
@@ -603,6 +596,20 @@ const getOneUsersPostController = async (req, res) => {
   }
 };
 
+
+
+const getDonorController = async (req, res) => {
+  try {
+
+    let donors = await Donor.find().sort({ createdAt: -1 });
+    res.status(200).json({ donors });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Something went wrong... Please try again later...", error: error });
+  }
+};
+
 // const getProductController = async (req,res)=>{};
 
 module.exports = {
@@ -619,4 +626,5 @@ module.exports = {
   getBloodDonationPostController,
   getOneUsersPostController,
   handleDeleteCommentController,
+  getDonorController
 };

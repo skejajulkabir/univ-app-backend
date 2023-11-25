@@ -10,10 +10,8 @@ const addOrderController = async (req, res) => {
     totalOrderPrice: 0,
   };
 
-
   try {
     const o = req.body;
-
 
     const { customer, cart, totalOrderValue, status } = o;
 
@@ -36,62 +34,69 @@ const addOrderController = async (req, res) => {
     }
 
     if (orderCredentials.totalOrderPrice !== parseInt(totalOrderValue)) {
-      res.status(409).jason({message : "There is some problem with the orderprice. Please try again..."})
+      res
+        .status(409)
+        .json({
+          message:
+            "There is some problem with the orderprice. Please try again...",
+        });
     }
 
     // console.log("totalordrvalue frm frntend.", totalOrderValue);
 
-    const ordr = new Order({ customer, cart, totalOrderValue : orderCredentials.totalOrderPrice , status });
+    const ordr = new Order({
+      customer,
+      cart,
+      totalOrderValue: orderCredentials.totalOrderPrice,
+      status,
+    });
 
     const savedOrder = await ordr.save();
 
-
     //? proceed to pay...
 
-    axios.get(`${process.env.backendURL}/payment/init`,
-      {
-        data : {
-          total_amount: parseInt(orderCredentials.totalOrderPrice) + parseInt(process.env.DELIVERY_CHARGE),
-          currency: 'BDT',
+    axios
+      .get(`${process.env.backendURL}/payment/init`, {
+        data: {
+          total_amount:
+            parseInt(orderCredentials.totalOrderPrice) +
+            parseInt(process.env.DELIVERY_CHARGE),
+          currency: "BDT",
           tran_id: savedOrder._id,
           product_name: savedOrder.cart[0].name,
-          product_category: 'Clothing',      //? Hadrcoded category...
-          product_profile: 'general',
+          product_category: "Clothing", //? Hadrcoded category...
+          product_profile: "general",
           cus_name: savedOrder.customer.fullName,
           cus_email: savedOrder.customer.email,
-          cus_add1: 'JASHORE', //! Hardcoded cus_add1
-          cus_add2: 'JASHORE', //! Hardcoded cus_add2
-          cus_city: 'JASHORE', //! Hardcoded cus_city
-          cus_state: 'JASHORE', //! Hardcoded cus_state
-          cus_postcode: '7407', //? PostCode of JASHORE
-          cus_country: 'Bangladesh',
-          cus_phone: savedOrder.customer.phone ,
-          cus_fax: '',
-          ship_name: savedOrder.customer.fullName ,
-          ship_add1: 'JASHORE', //! Hardcoded ship_add1
-          ship_add2: 'JASHORE', //! Hardcoded ship_add2
-          ship_city: 'JASHORE', //! Hardcoded ship_city
-          ship_state: 'JASHORE', //! Hardcoded ship_state
+          cus_add1: "JASHORE", //! Hardcoded cus_add1
+          cus_add2: "JASHORE", //! Hardcoded cus_add2
+          cus_city: "JASHORE", //! Hardcoded cus_city
+          cus_state: "JASHORE", //! Hardcoded cus_state
+          cus_postcode: "7407", //? PostCode of JASHORE
+          cus_country: "Bangladesh",
+          cus_phone: savedOrder.customer.phone,
+          cus_fax: "",
+          ship_name: savedOrder.customer.fullName,
+          ship_add1: "JASHORE", //! Hardcoded ship_add1
+          ship_add2: "JASHORE", //! Hardcoded ship_add2
+          ship_city: "JASHORE", //! Hardcoded ship_city
+          ship_state: "JASHORE", //! Hardcoded ship_state
           ship_postcode: 1000,
-          ship_country: 'Bangladesh',
-        }
-      }
-    ).then((resp)=>{
-      res.status(200).json({
-        message: "The order has been received successfully...",
-        newOrder: savedOrder,
-        paymentData: resp.data.apiResponse,
-        config: resp.config
+          ship_country: "Bangladesh",
+        },
+      })
+      .then((resp) => {
+        res.status(200).json({
+          message: "The order has been received successfully...",
+          newOrder: savedOrder,
+          paymentData: resp.data.apiResponse,
+          config: resp.config,
+        });
       });
-    })
-
-
   } catch (error) {
     console.error("Error saving data:", error);
     res.status(500).json({ message: "Could not add order to the DB.", error });
   }
 };
-
-
 
 module.exports = { addOrderController };
