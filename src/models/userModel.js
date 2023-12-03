@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
         description: {type:String},
     }],
     isVarified: {type:Boolean, default:false , required:true},
+    isRestricted: {type:Boolean, default:false },
     userType: {type:String, default:"STUDENT"},
     info: {
         bloodGroup : {type: String},
