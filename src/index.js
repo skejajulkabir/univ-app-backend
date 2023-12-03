@@ -46,6 +46,7 @@ app.use("/donate", DonationRouter)
 app.use((err , req , res , next)=>{
     console.log("Error: ", err);
     res.send(err);
+    console.log("universal error occured... from index.js")
 })
 
 
