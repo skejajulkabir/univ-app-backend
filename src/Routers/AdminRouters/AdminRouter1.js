@@ -1,5 +1,5 @@
 const express = require('express');
-const { isAdmin } = require('../../middlewares/middlewares')
+const { isAdmin , isModerator } = require('../../middlewares/middlewares')
 
 
 // requiring controllers
@@ -11,23 +11,23 @@ const { addproductsController , updateproductController , deleteProductControlle
 const AdminRouter1 = express.Router();
 
 
-AdminRouter1.post('/addproducts', isAdmin , addproductsController );
-AdminRouter1.put('/updateproducts',  updateproductController );
+AdminRouter1.post('/addproducts' , isModerator ,  addproductsController );
+AdminRouter1.put('/updateproducts', isModerator , updateproductController );
 AdminRouter1.delete('/deleteproduct/:id',  deleteProductController );
 
 
-AdminRouter1.post('/addroletoauser',  addRolesController );
+AdminRouter1.post('/addroletoauser', isAdmin , isModerator , addRolesController );
 
 
-AdminRouter1.get('/getorders',  getOrdersHandler );
-AdminRouter1.put('/updateorder',  updateOrderController );
+AdminRouter1.get('/getorders', isModerator ,  getOrdersHandler );
+AdminRouter1.put('/updateorder', isModerator ,  updateOrderController );
 
 
 
 
 
-AdminRouter1.post('/addsizes',  addSizesController );
-AdminRouter1.put('/updatesize',  updateSizeController );
-AdminRouter1.delete('/deletesize',  deleteSizeController );
+AdminRouter1.post('/addsizes', isModerator ,  addSizesController );
+AdminRouter1.put('/updatesize', isModerator , updateSizeController );
+AdminRouter1.delete('/deletesize', isModerator , deleteSizeController );
 
 module.exports = AdminRouter1;
