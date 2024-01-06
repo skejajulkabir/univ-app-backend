@@ -14,7 +14,6 @@ const is_live = false; //true for live, false for sandbox
 //sslcommerz init
 const initiate_SSL_Payment = (req, res) => {
   const requestData = req.body;
-  console.log(requestData)
 
   const data = {
     total_amount: requestData.total_amount,
@@ -108,7 +107,7 @@ const paymentSuccessController = async (req, res) => {
       console.error("Error updating available T-shirt sizes:", error);
     }
 
-    return res.redirect(`${process.env.frontendURL}/payment/success`);
+    return res.redirect(`${process.env.frontendURL}/payment/success/${order._id}`);
   } catch (error) {
     console.error("Error updating order:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -137,6 +136,10 @@ const paymentfailedController = async (req, res) => {
   }
 };
 
+
+
+
+
 const paymentCancelledController = async (req, res) => {
   try {
     const order = await Order.findByIdAndDelete(req.params.id);
@@ -155,58 +158,11 @@ const paymentCancelledController = async (req, res) => {
 
 
 
-//? <================== donation segment =================>
-//? <================== donation segment =================>
-//? <================== donation segment =================>
-
-
-const initiate_SSL_DONATION = (req, res) => {
-  const requestData = req.body;
-
-  const data = {
-    total_amount: requestData.total_amount,
-    currency: requestData.currency,
-    tran_id: requestData.tran_id,
-    success_url: `${process.env.backendURL}/donation/success/${requestData.tran_id}`, //? Not coming from frontend...
-    fail_url: `${process.env.backendURL}/donation/failed/${requestData.tran_id}`, //? Not coming from frontend...
-    cancel_url: `${process.env.backendURL}/donation/cancelled/${requestData.tran_id}`, //? Not coming from frontend...
-    ipn_url: `${process.env.backendURL}/donation/ipn/${requestData.tran_id}`, //? Not coming from frontend...(IPN = Instant Payment Notification...)
-    shipping_method: "Courier", //? //? Not coming from frontend...
-    product_name: "ITS A DONATION...",//? //? Not coming from frontend...
-    product_category: "ITS A DONATION...",//? //? Not coming from frontend...
-    product_profile: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_name: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_email: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_add1: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_add2: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_city: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_state: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_postcode: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_country: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_phone: "ITS A DONATION...",//? //? Not coming from frontend...
-    cus_fax: "ITS A DONATION...",//? //? Not coming from frontend...
-    ship_name: "ITS A DONATION...",//? //? Not coming from frontend...
-    ship_add1: "ITS A DONATION...",//? //? Not coming from frontend...
-    ship_add2: "ITS A DONATION...",//? //? Not coming from frontend...
-    ship_city: "ITS A DONATION...",//? //? Not coming from frontend...
-    ship_state: "ITS A DONATION...",//? //? Not coming from frontend...
-    ship_postcode: "ITS A DONATION...",//? //? Not coming from frontend...
-    ship_country: "ITS A DONATION...",//? //? Not coming from frontend...
-  };
-
-  const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
-  sslcz.init(data).then((apiResponse) => {
-    // let GatewayPageURL = apiResponse.GatewayPageURL;
-    res.json({ apiResponse });
-  });
-};
-
 
 
 
 module.exports = {
   initiate_SSL_Payment,
-  initiate_SSL_DONATION,
   validatePaymentController,
   paymentSuccessController,
   paymentfailedController,

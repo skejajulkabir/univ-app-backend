@@ -29,8 +29,6 @@ const addOrderController = async (req, res) => {
       orderCredentials.totalOrderPrice =
         orderCredentials.totalOrderPrice +
         cart[index].qty * productVariant.price;
-
-      // console.log( index, "====cart====", cart[index], "====abc=====", productVariant, "====ordrprice====", orderCredentials );
     }
 
     if (orderCredentials.totalOrderPrice !== parseInt(totalOrderValue)) {
@@ -55,7 +53,7 @@ const addOrderController = async (req, res) => {
 
     //? proceed to pay...
 
-    axios
+    await axios
       .get(`${process.env.backendURL}/payment/init`, {
         data: {
           total_amount:
